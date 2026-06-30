@@ -10,6 +10,15 @@
         h2 { color: #00adb5; margin-bottom: 20px; text-align: center; font-size: 24px; }
         input, textarea { width: 100%; padding: 12px; margin-bottom: 15px; background: #2d2d2d; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
         input:focus, textarea:focus { border-color: #00adb5; outline: none; }
+        
+        /* Стили махсус барои тугмаи интихоби расм */
+        .file-input-wrapper { margin-bottom: 15px; position: relative; }
+        .file-label { display: block; background: #34495e; color: white; padding: 12px; text-align: center; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: background 0.2s; border: 1px dashed #00adb5; }
+        .file-label:hover { background: #2c3e50; }
+        #movie-img-file { display: none; }
+        
+        .preview-img { width: 100%; max-height: 150px; object-fit: contain; margin-bottom: 15px; border-radius: 6px; display: none; border: 1px solid #444; }
+        
         .admin-btn { background: #00adb5; color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; border-radius: 6px; width: 100%; font-size: 16px; transition: background 0.2s; }
         .admin-btn:hover { background: #008c9e; }
         .hidden { display: none; }
@@ -23,7 +32,7 @@
         <h2>ZEROHUB – ПАНЕЛИ АДМИН</h2>
         
         <div id="setup-form" class="hidden">
-            <div class="info-note">Базаи шумо навест! Пароли асосии худро барои сайт эҷод кунед. Ин паролро ҳар вақт хоҳед иваз карда метавонед.</div>
+            <div class="info-note">Базаи шумо навест! Пароли асосии худро барои сайт эҷод кунед.</div>
             <span class="label-txt">Пароли навро нависед:</span>
             <input type="password" id="new-admin-pass" placeholder="Пароли нав">
             <button class="admin-btn" onclick="setupPassword()">САБТ КАРДАНИ ПАРОЛ</button>
@@ -39,10 +48,14 @@
             <span class="label-txt">Номи филм ё маҳсулот:</span>
             <input type="text" id="movie-title" placeholder="Масалан: GTA San Andreas">
             
-            <span class="label-txt">Ссылкаи расм (URL):</span>
-            <input type="text" id="movie-img" placeholder="https://site.com/image.jpg">
+            <span class="label-txt">Расми маҳсулотро бор кунед:</span>
+            <div class="file-input-wrapper">
+                <label for="movie-img-file" class="file-label" id="file-label-text">📸 Интихоби расм аз галерея</label>
+                <input type="file" id="movie-img-file" accept="image/*" onchange="previewAndConvertImage()">
+            </div>
+            <img id="img-preview" class="preview-img" src="" alt="Превью">
             
-            <span class="label-txt">Тавсифи кӯтоҳ (барои Google SEO):</span>
+            <span class="label-txt">Тавсифи кӯтоҳ:</span>
             <textarea id="movie-desc" rows="3" placeholder="Дар бораи ин маҳсулот кӯтоҳ нависед..."></textarea>
             
             <span class="label-txt">Ссылка барои Скачат ё Тамошо:</span>
@@ -55,38 +68,52 @@
     <script>
         const passURL = "https://zerohub2010-default-rtdb.firebaseio.com/secret_password.json";
         const databaseURL = "https://zerohub2010-default-rtdb.firebaseio.com/movies.json";
+        let base64ImageString = ""; // Ин ҷо коди расм сабт мешавад
 
         async function checkDatabaseStatus() {
             try {
                 const response = await fetch(passURL);
                 const data = await response.json();
-                
                 if (data === null) {
                     document.getElementById('setup-form').classList.remove('hidden');
                 } else {
                     document.getElementById('login-form').classList.remove('hidden');
                 }
             } catch (error) {
-                alert("Хатогӣ дар пайвастшавӣ ба Firebase!");
+                alert("Хатогӣ дар пайвастшавӣ!");
+            }
+        }
+
+        // Функция барои хондани расм аз галерея ва табдил додан ба матн
+        function previewAndConvertImage() {
+            const fileInput = document.getElementById('movie-img-file');
+            const file = fileInput.files[0];
+            const preview = document.getElementById('img-preview');
+            const labelText = document.getElementById('file-label-text');
+
+            if (file) {
+                labelText.innerText = "✅ Расм интихоб шуд: " + file.name;
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    base64ImageString = e.target.result; // Коди расм тайёр шуд
+                    preview.src = base64ImageString;
+                    preview.style.display = "block"; // Расмро дар админка нишон деҳ
+                }
+                reader.readAsDataURL(file);
             }
         }
 
         async function setupPassword() {
             const newPass = document.getElementById('new-admin-pass').value;
             if(!newPass) { alert("Лутфан паролро нависед!"); return; }
-
-            await fetch(passURL, {
-                method: "PUT",
-                body: JSON.stringify(newPass)
-            });
-
-            alert("Парол бомуваффақият дар база сабт шуд!");
+            await fetch(passURL, { method: "PUT", body: JSON.stringify(newPass) });
+            alert("Парол сабт шуд!");
             location.reload();
         }
 
         async function checkPassword() {
             const inputPass = document.getElementById('admin-pass').value;
-            
             const response = await fetch(passURL);
             const correctPassword = await response.json();
 
@@ -94,34 +121,38 @@
                 document.getElementById('login-form').classList.add('hidden');
                 document.getElementById('upload-form').classList.remove('hidden');
             } else {
-                alert("Пароли хато! Дастрасӣ манъ аст.");
+                alert("Пароли хато!");
             }
         }
 
         async function addMovie() {
             const title = document.getElementById('movie-title').value;
-            const img = document.getElementById('movie-img').value;
             const desc = document.getElementById('movie-desc').value;
             const link = document.getElementById('movie-link').value;
 
-            if(!title || !img || !link) {
-                alert("Лутфан Ном, Расм ва Ссылкаро пур кунед!");
+            if(!title || !base64ImageString || !link) {
+                alert("Лутфан Ном, Расм аз галерея ва Ссылкаро пур кунед!");
                 return;
             }
 
-            const newMovie = { title, img, desc, link };
+            // Маълумотро тайёр мекунем (ба ҷои ссылка коди расмро мефиристем)
+            const newMovie = { title, img: base64ImageString, desc, link };
 
             await fetch(databaseURL, {
                 method: "POST",
                 body: JSON.stringify(newMovie)
             });
 
+            // Тоза кардани форма пас аз муваффақият
             document.getElementById('movie-title').value = "";
-            document.getElementById('movie-img').value = "";
             document.getElementById('movie-desc').value = "";
             document.getElementById('movie-link').value = "";
+            document.getElementById('movie-img-file').value = "";
+            document.getElementById('img-preview').style.display = "none";
+            document.getElementById('file-label-text').innerText = "📸 Интихоби расм аз галерея";
+            base64ImageString = "";
             
-            alert("Муваффақият! Маҳсулот ба ZEROHUB илова шуд.");
+            alert("Муваффақият! Маҳсулот бо расмаш ба ZEROHUB илова шуд.");
         }
 
         checkDatabaseStatus();
