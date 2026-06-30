@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEROHUB - Digital Movies & Products</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #141414; color: white; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 10px; color: #E50914; font-size: 35px; letter-spacing: 3px; font-weight: 900; }
+        .sub-title { text-align: center; color: #888; margin-bottom: 30px; font-size: 14px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; padding: 20px 0; max-width: 1200px; margin: 0 auto; }
+        .card { background: #1f1f1f; border-radius: 12px; overflow: hidden; padding: 12px; border: 1px solid #2a2a2a; text-align: center; transition: transform 0.2s; }
+        .card:hover { transform: scale(1.03); border-color: #444; }
+        .card img { width: 100%; height: 280px; object-fit: cover; border-radius: 8px; }
+        .card h3 { margin: 12px 0 6px 0; font-size: 18px; color: #fff; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card p { font-size: 13px; color: #aaa; margin-bottom: 15px; height: 36px; overflow: hidden; text-align: left; line-height: 1.4; }
+        .btn { display: block; background: #E50914; color: white; padding: 10px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; text-transform: uppercase; text-align: center; }
+        .btn:hover { background: #b80710; }
+        .no-data { text-align: center; color: #666; padding: 40px; font-size: 16px; width: 100%; grid-column: 1 / -1; }
+    </style>
+</head>
+<body>
+
+    <h1>ZEROHUB</h1>
+    <p class="sub-title">Download Movies, Games & Digital Products</p>
+    
+    <div class="grid" id="movies-list"></div>
+
+    <script>
+        const databaseURL = "https://zerohub2010-default-rtdb.firebaseio.com/movies.json";
+
+        async function loadMovies() {
+            try {
+                const response = await fetch(databaseURL);
+                const data = await response.json();
+                const listData = document.getElementById('movies-list');
+                listData.innerHTML = ""; 
+
+                if(data) {
+                    Object.keys(data).forEach(key => {
+                        const movie = data[key];
+                        listData.innerHTML += `
+                            <div class="card">
+                                <img src="${movie.img}" alt="${movie.title}">
+                                <h3>${movie.title}</h3>
+                                <p>${movie.desc}</p>
+                                <a href="${movie.link}" class="btn" target="_blank">Download / Watch</a>
+                            </div>
+                        `;
+                    });
+                } else {
+                    listData.innerHTML = "<p class='no-data'>No products available yet. / Пока нет доступных товаров.</p>";
+                }
+            } catch (error) {
+                document.getElementById('movies-list').innerHTML = "<p class='no-data'>Error loading database.</p>";
+            }
+        }
+        loadMovies();
+    </script>
+</body>
+</html>
