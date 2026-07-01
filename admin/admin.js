@@ -96,3 +96,81 @@ function generateSlug(text) {
         .replace(/^-+/, '')             // Дефисро аз аввали матн нест мекунад
         .replace(/-+$/, '');            // Дефисро аз охири матн нест мекунад
 }
+// === ФУНКСИЯИ САБТ КАРДАНИ МАҲСУЛОТ БА БАЗА (FIREBASE) ===
+const saveProductBtn = document.getElementById('save-product-btn');
+if (saveProductBtn) {
+    saveProductBtn.addEventListener('click', () => {
+        // Гирифтани маълумот аз майдонҳои форма
+        const title = document.getElementById('p-title').value;
+        const version = document.getElementById('p-version').value;
+        const size = document.getElementById('p-size').value;
+        const category = document.getElementById('p-category').value;
+        const imageUrl = document.getElementById('p-image').value;
+        const downloadUrl = document.getElementById('p-download').value;
+        const description = document.getElementById('p-desc').value;
+
+        // Санҷиш: оё майдонҳои асосӣ пур шудаанд?
+        if (!title || !downloadUrl) {
+            alert("Лутфан Номи маҳсулот ва Линки боргириро ворид кунед!");
+            return;
+        }
+
+        // Алоқа бо бахши танзимоти база барои гирифтани рақами ID-и охирин
+        const counterRef = database.ref('settings/last_id_counter');
+        
+        counterRef.transaction((currentCounter) => {
+            // Агар дар база ҳисобкунак набошад, онро аз 1 сар мекунем
+            return (currentCounter || 0) + 1;
+        }, (error, committed, snapshot) => {
+            if (committed) {
+                const newIdNumber = snapshot.val();
+                
+                // Формат кардани ID ба намуди ZH-000001
+                const formattedId = "ZH-" + String(newIdNumber).padStart(6, '0');
+                
+                // Худкор сохтани Slug аз рӯи номи маҳсулот
+                const slug = generateSlug(title);
+                
+                // Санаи имрӯзаи худкор (Формат: СССС-ММ-ҶҶ)
+                const today = new Date().toISOString().split('T')[0];
+
+                // Объект (маълумот)-и маҳсулот барои сабт
+                const productData = {
+                    id: formattedId,
+                    title: title,
+                    slug: slug,
+                    version: version || "v1.0",
+                    size: size || "Номаълум",
+                    category: category,
+                    image_url: imageUrl || "",
+                    download_url: downloadUrl,
+                    description: description || "",
+                    downloads_count: 0,
+                    views_count: 0,
+                    created_at: today
+                };
+
+                // Сабти маҳсулот ба папкаи 'products' дар Firebase
+                database.ref('products/' + formattedId).set(productData)
+                    .then(() => {
+                        alert("Маҳсулот бо ID-и " + formattedId + " бомуваффақият сабт шуд!");
+                        // Тоза кардани майдонҳои форма пас аз сабт
+                        document.getElementById('p-title').value = "";
+                        document.getElementById('p-version').value = "";
+                        document.getElementById('p-size').value = "";
+                        document.getElementById('p-image').value = "";
+                        document.getElementById('p-download').value = "";
+                        document.getElementById('p-desc').value = "";
+                        // Маҳкам кардани форма
+                        productFormBlock.style.display = "none";
+                        toggleFormBtn.innerText = "+ Иловаи нав";
+                        toggleFormBtn.style.background = "#3ddc84";
+                        toggleFormBtn.style.color = "black";
+                    })
+                    .catch((err) => {
+                        alert("Хатогӣ ҳангоми сабт: " + err.message);
+                    });
+            }
+        });
+    });
+}
