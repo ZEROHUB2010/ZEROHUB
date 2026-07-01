@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEROHUB CMS - Панели Админ</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #0f1115; color: white; display: flex; min-height: 100vh; }
+        
+        /* Менюи паҳлӯӣ (Sidebar) */
+        .sidebar { width: 260px; background: #1b1f27; padding: 20px; display: flex; flex-direction: column; }
+        .sidebar .logo { font-size: 24px; font-weight: bold; color: #3ddc84; text-align: center; margin-bottom: 30px; }
+        .sidebar a { color: #ccc; text-decoration: none; padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; display: block; font-size: 15px; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background: #2b313d; color: #3ddc84; }
+        .sidebar .logout-btn { margin-top: auto; background: #ff4a4a; color: white; text-align: center; cursor: pointer; }
+        .sidebar .logout-btn:hover { background: #e03b3b; color: white; }
+
+        /* Қисми асосии саҳифа (Main Content) */
+        .main-content { flex: 1; padding: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #2b313d; padding-bottom: 15px; }
+        .header h1 { font-size: 24px; }
+        
+        /* Карточкаҳои статистика */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .stat-card { background: #1b1f27; padding: 20px; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .stat-card h3 { color: #999; font-size: 14px; margin-bottom: 10px; }
+        .stat-card .value { font-size: 28px; font-weight: bold; color: #3ddc84; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">ZEROHUB</div>
+        <a href="dashboard.html" class="active">📊 Статистика</a>
+        <a href="products.html">📦 Маҳсулотҳо</a>
+        <a href="settings.html">⚙️ Танзимот</a>
+        <a id="logout-btn" class="logout-btn">🚪 ХУРУҶ</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Хуш омадед ба Панели Админ!</h1>
+            <span id="admin-email" style="color: #999;">admin@zerohub.tj</span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Ҳамаи Маҳсулотҳо</h3>
+                <div class="value" id="total-products">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Боргириҳо (Downloads)</h3>
+                <div class="value" id="total-downloads">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Бинандагон (Views)</h3>
+                <div class="value" id="total-views">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <script src="admin.js"></script>
+
+</body>
+</html>
