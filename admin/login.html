@@ -3,181 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>ZEROHUB CMS - Login</title>
-
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-
-background:#0f1115;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-height:100vh;
-
-color:white;
-
-}
-
-.login-box{
-
-width:360px;
-
-background:#1b1f27;
-
-padding:30px;
-
-border-radius:18px;
-
-box-shadow:0 0 30px rgba(0,0,0,.5);
-
-}
-
-.logo{
-
-text-align:center;
-
-font-size:34px;
-
-font-weight:bold;
-
-color:#3ddc84;
-
-margin-bottom:8px;
-
-}
-
-.sub{
-
-text-align:center;
-
-color:#999;
-
-margin-bottom:30px;
-
-}
-
-input{
-
-width:100%;
-
-padding:14px;
-
-margin-top:15px;
-
-border:none;
-
-outline:none;
-
-background:#2b313d;
-
-color:white;
-
-border-radius:10px;
-
-font-size:15px;
-
-}
-
-button{
-
-width:100%;
-
-padding:15px;
-
-margin-top:20px;
-
-border:none;
-
-border-radius:10px;
-
-background:#3ddc84;
-
-color:black;
-
-font-size:16px;
-
-font-weight:bold;
-
-cursor:pointer;
-
-transition:.3s;
-
-}
-
-button:hover{
-
-background:#2ac46d;
-
-}
-
-.footer{
-
-text-align:center;
-
-margin-top:20px;
-
-color:#777;
-
-font-size:13px;
-
-}
-
+*{ margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+body{ background:#0f1115; display:flex; justify-content:center; align-items:center; height:100vh; color:white; }
+.login-box{ width:360px; background:#1b1f27; padding:30px; border-radius:18px; box-shadow:0 0 30px rgba(0,0,0,.5); }
+.logo{ text-align:center; font-size:34px; font-weight:bold; color:#3ddc84; margin-bottom:8px; }
+.sub{ text-align:center; color:#999; margin-bottom:30px; }
+input{ width:100%; padding:14px; margin-top:15px; border:none; outline:none; background:#2b313d; color:white; border-radius:10px; font-size:15px; }
+button{ width:100%; padding:15px; margin-top:20px; border:none; border-radius:10px; background:#3ddc84; color:black; font-size:16px; font-weight:bold; cursor:pointer; transition:.3s; }
+button:hover{ background:#2ac46d; }
+.footer{ text-align:center; margin-top:20px; color:#777; font-size:13px; }
+/* Ранги сурх барои хатогиҳо */
+.error-msg { color: #ff4a4a; font-size: 14px; text-align: center; margin-top: 10px; display: none; }
 </style>
-
 </head>
-
 <body>
 
 <div class="login-box">
+<div class="logo">ZEROHUB</div>
+<div class="sub">CMS v3.0</div>
 
-<div class="logo">
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
 
-ZEROHUB
+<div class="error-msg" id="error-message">Хато: Email ё Парол нодуруст аст!</div>
 
+<button id="login-btn">ВОРИД ШУДАН</button>
+
+<div class="footer">ZEROHUB © 2026</div>
 </div>
 
-<div class="sub">
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-CMS v3.0
-
-</div>
-
-<input
-type="email"
-id="email"
-placeholder="Email">
-
-<input
-type="password"
-id="password"
-placeholder="Password">
-
-<button>
-
-ВОРИД ШУДАН
-
-</button>
-
-<div class="footer">
-
-ZEROHUB © 2026
-
-</div>
-
-</div>
+<script src="admin.js"></script>
 
 </body>
 </html>
