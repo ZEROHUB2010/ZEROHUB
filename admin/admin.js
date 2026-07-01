@@ -174,3 +174,49 @@ if (saveProductBtn) {
         });
     });
 }
+// === ФУНКСИЯИ ХОНДАН ВА НАМОИШ ДОДАНИ МАҲСУЛОТҲО ДАР ҶАДВАЛ ===
+const productsListTbody = document.getElementById('products-list-tbody');
+
+if (productsListTbody) {
+    // Хондани маълумот аз папкаи 'products' дар Firebase Realtime Database
+    database.ref('products').on('value', (snapshot) => {
+        // Аввал дохили ҷадвалро холӣ мекунем, то маҳсулотҳо дубор (повторно) нишон дода нашаванд
+        productsListTbody.innerHTML = "";
+        
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnapshot) => {
+                const product = childSnapshot.val();
+                
+                // Сохтани як сатри нав (tr) барои ҷадвал
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td><b>${product.id}</b></td>
+                    <td><img src="${product.image_url || 'https://via.placeholder.com/40'}" width="40" height="40" style="border-radius: 6px; object-fit: cover;"></td>
+                    <td>${product.title}</td>
+                    <td><span style="background: #2b313d; padding: 4px 8px; border-radius: 6px; font-size: 13px;">${product.category}</span></td>
+                    <td>${product.version}</td>
+                    <td><button class="actions-btn" onclick="deleteProduct('${product.id}')">Нест кардан</button></td>
+                `;
+                
+                // Илова кардани сатр ба дохили ҷадвал
+                productsListTbody.appendChild(row);
+            });
+        } else {
+            productsListTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #777;">Ягон маҳсулот ёфт нашуд.</td></tr>`;
+        }
+    });
+}
+
+// Функсияи нест кардани маҳсулот аз база
+function deleteProduct(productId) {
+    if (confirm("Оё шумо ҳақиқатан мехоҳед маҳсулоти " + productId + "-ро нест кунед?")) {
+        database.ref('products/' + productId).remove()
+            .then(() => {
+                alert("Маҳсулот нест карда шуд!");
+            })
+            .catch((err) => {
+                alert("Хатогӣ ҳангоми нест кардан: " + err.message);
+            });
+    }
+}
