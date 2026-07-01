@@ -12,6 +12,7 @@ const firebaseConfig = {
 // Ибтидои Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+const database = firebase.database();
 
 // === МАНТИҚИ САҲИФАИ ЛОГИН (login.html) ===
 const loginBtn = document.getElementById('login-btn');
@@ -38,19 +39,19 @@ if (loginBtn) {
     });
 }
 
-// === МАНТИҚИ САҲИФАИ АСОСӢ (dashboard.html) ===
-// Амният: Санҷиши он ки админ ворид шудааст ё не
+// === МАНТИҚИ АМНИЯТӢ БАРОИ САҲИФАҲОИ АДМИНКА ===
 auth.onAuthStateChanged((user) => {
-    // Агар мо дар саҳифаи dashboard бошем
-    if (window.location.pathname.includes('dashboard.html')) {
-        if (user) {
-            // Агар ворид шуда бошад, email-ашро дар экран нишон медиҳем
-            document.getElementById('admin-email').innerText = user.email;
-            
-            // Дар ин ҷо баъдтар коди хондани статистикаро аз базаи маълумот илова мекунем
-        } else {
-            // Агар логин накарда бошад, ӯро ба саҳифаи लॉगिन мефиристем
+    const isDashboard = window.location.pathname.includes('dashboard.html');
+    const isProducts = window.location.pathname.includes('products.html');
+    
+    if (isDashboard || isProducts) {
+        if (!user) {
+            // Агар логин накарда бошад, ба саҳифаи लॉगिन пеш кун
             window.location.href = "login.html";
+        } else {
+            // Агар дар саҳифаи dashboard бошад ва логин дошта бошад
+            const adminEmailSpan = document.getElementById('admin-email');
+            if (adminEmailSpan) adminEmailSpan.innerText = user.email;
         }
     }
 });
@@ -63,4 +64,35 @@ if (logoutBtn) {
             window.location.href = "login.html";
         });
     });
+}
+
+// === МАНТИҚИ САҲИФАИ МАҲСУЛОТҲО (products.html) ===
+const toggleFormBtn = document.getElementById('toggle-form-btn');
+const productFormBlock = document.getElementById('product-form-block');
+
+if (toggleFormBtn && productFormBlock) {
+    // 1. Намоиш ё пинҳон кардани формаи иловакунӣ
+    toggleFormBtn.addEventListener('click', () => {
+        if (productFormBlock.style.display === "none" || productFormBlock.style.display === "") {
+            productFormBlock.style.display = "block";
+            toggleFormBtn.innerText = "X Пинҳон кардан";
+            toggleFormBtn.style.background = "#ff4a4a";
+            toggleFormBtn.style.color = "white";
+        } else {
+            productFormBlock.style.display = "none";
+            toggleFormBtn.innerText = "+ Иловаи нав";
+            toggleFormBtn.style.background = "#3ddc84";
+            toggleFormBtn.style.color = "black";
+        }
+    });
+}
+
+// Функсия барои автоматӣ сохтани Slug (Линки зебо аз рӯи ном)
+function generateSlug(text) {
+    return text.toString().toLowerCase()
+        .replace(/\s+/g, '-')           // Иваз кардани пробелҳо ба дефис (-)
+        .replace(/[^\w\-]+/g, '')       // Танҳо ҳарфҳо ва дефисро нигоҳ медорад
+        .replace(/\-\-+/g, '-')         // Дефисҳои зиёдатиро нест мекунад
+        .replace(/^-+/, '')             // Дефисро аз аввали матн нест мекунад
+        .replace(/-+$/, '');            // Дефисро аз охири матн нест мекунад
 }
