@@ -13,7 +13,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// Мантиқи пахши тугмаи "Ворид шудан"
+// === МАНТИҚИ САҲИФАИ ЛОГИН (login.html) ===
 const loginBtn = document.getElementById('login-btn');
 if (loginBtn) {
     loginBtn.addEventListener('click', () => {
@@ -35,5 +35,32 @@ if (loginBtn) {
                 errorDiv.innerText = "Email ё Пароли нодуруст!";
                 errorDiv.style.display = "block";
             });
+    });
+}
+
+// === МАНТИҚИ САҲИФАИ АСОСӢ (dashboard.html) ===
+// Амният: Санҷиши он ки админ ворид шудааст ё не
+auth.onAuthStateChanged((user) => {
+    // Агар мо дар саҳифаи dashboard бошем
+    if (window.location.pathname.includes('dashboard.html')) {
+        if (user) {
+            // Агар ворид шуда бошад, email-ашро дар экран нишон медиҳем
+            document.getElementById('admin-email').innerText = user.email;
+            
+            // Дар ин ҷо баъдтар коди хондани статистикаро аз базаи маълумот илова мекунем
+        } else {
+            // Агар логин накарда бошад, ӯро ба саҳифаи लॉगिन мефиристем
+            window.location.href = "login.html";
+        }
+    }
+});
+
+// Функсияи Хуруҷ (Logout)
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        auth.signOut().then(() => {
+            window.location.href = "login.html";
+        });
     });
 }
