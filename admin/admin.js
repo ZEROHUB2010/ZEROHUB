@@ -1,79 +1,205 @@
-// Танзимоти Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
-  authDomain: "zerohub2010.firebaseapp.com",
-  databaseURL: "https://zerohub2010-default-rtdb.firebaseio.com",
-  projectId: "zerohub2010",
-  storageBucket: "zerohub2010.firebasestorage.app",
-  messagingSenderId: "10761752021",
-  appId: "1:10761752021:web:891c5494e298f2c21e815c"
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+getDatabase,
+
+ref,
+
+push,
+
+update,
+
+remove,
+
+onValue
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig={
+
+apiKey:"AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
+
+authDomain:"zerohub2010.firebaseapp.com",
+
+databaseURL:"https://zerohub2010-default-rtdb.firebaseio.com",
+
+projectId:"zerohub2010",
+
+storageBucket:"zerohub2010.firebasestorage.app",
+
+messagingSenderId:"10761752021",
+
+appId:"1:10761752021:web:891c5494e298f2c21e815c"
+
 };
 
-// Оғоз
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
+const app=initializeApp(firebaseConfig);
 
-// Логин
-const loginBtn = document.getElementById('login-btn');
-if (loginBtn) {
-    loginBtn.addEventListener('click', () => {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(email, password)
-            .then(() => window.location.href = "dashboard.html")
-            .catch(() => alert("Email ё Парол нодуруст!"));
-    });
-}
+const db=getDatabase(app);
 
-// Амният
-auth.onAuthStateChanged((user) => {
-    const isProtected = window.location.pathname.includes('dashboard.html') || window.location.pathname.includes('products.html');
-    if (isProtected && !user) window.location.href = "login.html";
-    if (user && document.getElementById('admin-email')) document.getElementById('admin-email').innerText = user.email;
+const productsRef=ref(db,"products_v2");
+
+const form=document.getElementById("productForm");
+
+const list=document.getElementById("productList");
+
+let editId=null;
+export function loadProducts(){
+
+onValue(productsRef,(snapshot)=>{
+
+const data=snapshot.val();
+
+if(!list)return;
+
+list.innerHTML="";
+
+if(!data)return;
+
+Object.keys(data).reverse().forEach(id=>{
+
+const p=data[id];
+
+list.innerHTML+=`
+
+<div class="product-item">
+
+<img src="${p.image}" width="60">
+
+<div>
+
+<b>${p.title}</b><br>
+
+<small>${p.version} • ${p.category}</small>
+
+</div>
+
+<div>
+
+<button onclick="editProduct('${id}')">
+
+Edit
+
+</button>
+
+<button onclick="deleteProduct('${id}')">
+
+Delete
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
 });
 
-// Logout
-const logoutBtn = document.getElementById('logout-btn');
-if (logoutBtn) logoutBtn.addEventListener('click', () => auth.signOut().then(() => window.location.href = "login.html"));
+});
 
-// Формаи иловакунӣ
-const toggleFormBtn = document.getElementById('toggle-form-btn');
-const productFormBlock = document.getElementById('product-form-block');
-if (toggleFormBtn && productFormBlock) {
-    toggleFormBtn.addEventListener('click', () => {
-        productFormBlock.style.display = productFormBlock.style.display === "none" ? "block" : "none";
-    });
+}
+window.editProduct=function(id){
+
+editId=id;
+
+alert("Қисми пурраи Edit баъдтар пайваст мешавад.");
+
+};
+
+window.deleteProduct=function(id){
+
+if(!confirm("Ин маҳсулот нест карда шавад?")) return;
+
+remove(ref(db,"products_v2/"+id));
+
+};
+
+form?.addEventListener("submit",(e)=>{
+
+e.preventDefault();
+
+const product={
+
+title:document.getElementById("title").value,
+
+category:document.getElementById("category").value,
+
+version:document.getElementById("version").value,
+
+size:document.getElementById("size").value,
+
+image:document.getElementById("image").value,
+
+screen1:document.getElementById("screen1").value,
+
+screen2:document.getElementById("screen2").value,
+
+screen3:document.getElementById("screen3").value,
+
+video:document.getElementById("video").value,
+
+link:document.getElementById("link").value,
+
+description:document.getElementById("description").value,
+
+views:0,
+
+downloads:0,
+
+date:new Date().toLocaleDateString()
+
+};
+if(editId){
+
+update(ref(db,"products_v2/"+editId),product)
+
+.then(()=>{
+
+alert("Маҳсулот навсозӣ шуд.");
+
+editId=null;
+
+form.reset();
+
+});
+
+}else{
+
+push(productsRef,product)
+
+.then(()=>{
+
+alert("Маҳсулот илова шуд.");
+
+form.reset();
+
+});
+
 }
 
-// Сабт ба база
-const saveProductBtn = document.getElementById('save-product-btn');
-if (saveProductBtn) {
-    saveProductBtn.addEventListener('click', () => {
-        const title = document.getElementById('p-title').value;
-        database.ref('settings/last_id_counter').transaction((c) => (c || 0) + 1, (err, comm, snap) => {
-            if (comm) {
-                const id = "ZH-" + String(snap.val()).padStart(6, '0');
-                database.ref('products/' + id).set({
-                    id: id,
-                    title: title,
-                    category: document.getElementById('p-category').value,
-                    download_url: document.getElementById('p-download').value,
-                    image_url: document.getElementById('p-image').value
-                }).then(() => { alert("Сабт шуд!"); location.reload(); });
-            }
-        });
-    });
-}
+});
 
-// Рӯйхати маҳсулотҳо
-const list = document.getElementById('products-list-tbody');
-if (list) {
-    database.ref('products').on('value', (snap) => {
-        list.innerHTML = "";
-        snap.forEach((child) => {
-            const p = child.val();
-            list.innerHTML += `<tr><td>${p.id}</td><td>${p.title}</td><td>${p.category}</td><td><button onclick="database.ref('products/${p.id}').remove()">X</button></td></tr>`;
-        });
-    });
-}
+loadProducts();
+window.logout=function(){
+
+localStorage.removeItem("zerohub_login");
+
+window.location.href="login.html";
+
+};
+
+window.addEventListener("online",()=>{
+
+console.log("Firebase Connected");
+
+});
+
+window.addEventListener("offline",()=>{
+
+alert("Интернет қатъ шудааст!");
+
+});
+
+console.log("ZEROHUB admin.js Loaded");
