@@ -1,9 +1,394 @@
 <!DOCTYPE html>
-<html>
+<html lang="tg">
+
 <head>
-    <meta http-equiv="refresh" content="0; url=/ZEROHUB/admin/login.html">
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>ZEROHUB</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+
+margin:0;
+
+padding:0;
+
+box-sizing:border-box;
+
+font-family:Poppins,sans-serif;
+
+}
+
+body{
+
+background:#0f1115;
+
+color:#fff;
+
+}
+
+header{
+
+position:sticky;
+
+top:0;
+
+z-index:999;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:18px 22px;
+
+background:#17191f;
+
+border-bottom:1px solid #2a2d35;
+
+}
+
+.logo{
+
+font-size:30px;
+
+font-weight:700;
+
+color:#35d06e;
+
+}
+
+.search{
+
+width:220px;
+
+padding:12px;
+
+background:#1f222a;
+
+border:none;
+
+outline:none;
+
+border-radius:12px;
+
+color:#fff;
+
+}
+
+.banner{
+
+margin:20px;
+
+padding:40px;
+
+border-radius:22px;
+
+background:linear-gradient(135deg,#35d06e,#138a4d);
+
+}
+
+.banner h1{
+
+font-size:34px;
+
+margin-bottom:10px;
+
+}
+
+.banner p{
+
+font-size:17px;
+
+opacity:.9;
+
+}
+
+.products{
+
+padding:20px;
+
+display:grid;
+
+grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+
+gap:20px;
+
+}
+
+.card{
+
+background:#17191f;
+
+border-radius:18px;
+
+overflow:hidden;
+
+border:1px solid #2a2d35;
+
+transition:.3s;
+
+cursor:pointer;
+
+}
+
+.card:hover{
+
+transform:translateY(-5px);
+
+border-color:#35d06e;
+
+}
+.card img{
+
+width:100%;
+
+height:180px;
+
+object-fit:cover;
+
+}
+
+.info{
+
+padding:15px;
+
+}
+
+.title{
+
+font-size:18px;
+
+font-weight:600;
+
+margin-bottom:8px;
+
+}
+
+.meta{
+
+font-size:14px;
+
+color:#9ea7b3;
+
+margin-bottom:12px;
+
+}
+
+.download{
+
+display:inline-block;
+
+padding:10px 18px;
+
+background:#35d06e;
+
+color:#111;
+
+text-decoration:none;
+
+border-radius:10px;
+
+font-weight:600;
+
+}
+
+footer{
+
+text-align:center;
+
+padding:30px;
+
+color:#8d95a3;
+
+}
+
+</style>
+
 </head>
+
 <body>
-    <p>Дар ҳоли интиқол...</p>
+
+<header>
+
+<div class="logo">
+
+ZEROHUB
+
+</div>
+
+<input
+
+class="search"
+
+type="search"
+
+placeholder="Ҷустуҷӯи барнома...">
+
+</header>
+
+<section class="banner">
+
+<h1>Welcome to ZEROHUB</h1>
+
+<p>
+
+Барномаҳо, бозиҳо, модҳо ва иконкаҳоро бо суръати баланд зеркашӣ кунед.
+
+</p>
+
+</section>
+
+<section
+
+class="products"
+
+id="products">
+
+</section>
+
+<footer>
+
+© 2026 ZEROHUB
+
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+getDatabase,
+
+ref,
+
+onValue
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig={
+
+apiKey:"AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
+
+authDomain:"zerohub2010.firebaseapp.com",
+
+databaseURL:"https://zerohub2010-default-rtdb.firebaseio.com",
+
+projectId:"zerohub2010",
+
+storageBucket:"zerohub2010.firebasestorage.app",
+
+messagingSenderId:"10761752021",
+
+appId:"1:10761752021:web:891c5494e298f2c21e815c"
+
+};
+
+const app=initializeApp(firebaseConfig);
+
+const db=getDatabase(app);
+
+const productsRef=ref(db,"products_v2");
+
+const container=document.getElementById("products");
+onValue(productsRef,(snapshot)=>{
+
+const data=snapshot.val();
+
+container.innerHTML="";
+
+if(!data){
+
+container.innerHTML="<h2 style='padding:20px'>Ҳоло ягон барнома нест.</h2>";
+
+return;
+
+}
+
+Object.keys(data).reverse().forEach(key=>{
+
+const p=data[key];
+
+container.innerHTML+=`
+
+<div class="card">
+
+<img src="${p.image}" alt="${p.title}">
+
+<div class="info">
+
+<div class="title">${p.title}</div>
+
+<div class="meta">
+
+${p.category} • ${p.version}<br>
+
+${p.size}
+
+</div>
+
+<a class="download"
+
+href="${p.link}"
+
+target="_blank">
+
+Download
+
+</a>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+});
+
+const search=document.querySelector(".search");
+search.addEventListener("input",()=>{
+
+const value=search.value.toLowerCase();
+
+document.querySelectorAll(".card").forEach(card=>{
+
+card.style.display=
+
+card.innerText.toLowerCase().includes(value)
+
+?"block":"none";
+
+});
+
+});
+
+window.addEventListener("load",()=>{
+
+document.body.style.opacity="0";
+
+setTimeout(()=>{
+
+document.body.style.transition=".4s";
+
+document.body.style.opacity="1";
+
+},100);
+
+});
+
+console.log("ZEROHUB Home Loaded");
+
+</script>
+
 </body>
+
 </html>
