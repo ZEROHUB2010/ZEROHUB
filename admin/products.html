@@ -1,122 +1,361 @@
 <!DOCTYPE html>
 <html lang="tg">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZEROHUB CMS - Маҳсулотҳо</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { background: #0f1115; color: white; display: flex; min-height: 100vh; }
-        
-        /* Sidebar (Меню) */
-        .sidebar { width: 260px; background: #1b1f27; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar .logo { font-size: 24px; font-weight: bold; color: #3ddc84; text-align: center; margin-bottom: 30px; }
-        .sidebar a { color: #ccc; text-decoration: none; padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; display: block; font-size: 15px; transition: 0.3s; }
-        .sidebar a:hover, .sidebar a.active { background: #2b313d; color: #3ddc84; }
-        .sidebar .logout-btn { margin-top: auto; background: #ff4a4a; color: white; text-align: center; cursor: pointer; padding: 12px; border-radius: 8px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-        /* Main Content */
-        .main-content { flex: 1; padding: 30px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #2b313d; padding-bottom: 15px; }
-        .add-btn { background: #3ddc84; color: black; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
-        /* Формаи иловакунии маҳсулот */
-        .form-container { background: #1b1f27; padding: 25px; border-radius: 14px; margin-bottom: 30px; display: none; }
-        .form-container h2 { margin-bottom: 20px; color: #3ddc84; font-size: 20px; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { color: #999; font-size: 14px; margin-bottom: 5px; }
-        .form-group input, .form-group select, .form-group textarea { background: #2b313d; border: none; padding: 12px; border-radius: 8px; color: white; font-size: 15px; outline: none; }
-        .form-group textarea { grid-column: span 2; height: 100px; resize: none; }
-        .full-width { grid-column: span 2; }
-        .save-btn { background: #3ddc84; color: black; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 16px; }
-        
-        /* Рӯйхати Маҳсулотҳо (Table) */
-        .products-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1b1f27; border-radius: 14px; overflow: hidden; }
-        .products-table th, .products-table td { padding: 15px; text-align: left; border-bottom: 1px solid #2b313d; }
-        .products-table th { background: #2b313d; color: #3ddc84; font-size: 14px; }
-        .products-table td { color: #ccc; font-size: 15px; }
-        .actions-btn { background: #ff4a4a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-    </style>
+<title>ZEROHUB Products</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins,sans-serif;
+}
+
+body{
+
+background:#0f1115;
+
+color:#fff;
+
+}
+
+header{
+
+position:sticky;
+
+top:0;
+
+z-index:100;
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:18px 20px;
+
+background:#17191f;
+
+border-bottom:1px solid #2a2d35;
+
+}
+
+.logo{
+
+font-size:28px;
+
+font-weight:700;
+
+color:#35d06e;
+
+}
+
+.search{
+
+width:220px;
+
+padding:12px 15px;
+
+background:#1f222a;
+
+border:none;
+
+border-radius:12px;
+
+color:#fff;
+
+outline:none;
+
+}
+
+.container{
+
+padding:20px;
+
+display:grid;
+
+grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+
+gap:20px;
+
+}
+.cards{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+
+gap:20px;
+
+}
+
+.card{
+
+background:#17191f;
+
+border:1px solid #2a2d35;
+
+border-radius:18px;
+
+overflow:hidden;
+
+transition:.3s;
+
+cursor:pointer;
+
+}
+
+.card:hover{
+
+transform:translateY(-6px);
+
+border-color:#35d06e;
+
+}
+
+.card img{
+
+width:100%;
+
+height:180px;
+
+object-fit:cover;
+
+}
+
+.info{
+
+padding:16px;
+
+}
+
+.title{
+
+font-size:18px;
+
+font-weight:600;
+
+margin-bottom:8px;
+
+}
+
+.meta{
+
+color:#9ea7b3;
+
+font-size:14px;
+
+margin-bottom:12px;
+
+}
+
+.download{
+
+display:inline-block;
+
+padding:10px 18px;
+
+background:#35d06e;
+
+color:#111;
+
+text-decoration:none;
+
+border-radius:10px;
+
+font-weight:600;
+
+}
+
+</style>
+
 </head>
+
 <body>
 
-    <div class="sidebar">
-        <div class="logo">ZEROHUB</div>
-        <a href="dashboard.html">📊 Статистика</a>
-        <a href="products.html" class="active">📦 Маҳсулотҳо</a>
-        <a href="settings.html">⚙️ Танзимот</a>
-        <a id="logout-btn" class="logout-btn">🚪 ХУРУҶ</a>
-    </div>
+<header>
 
-    <div class="main-content">
-        <div class="header">
-            <h1>Идоракунии Маҳсулотҳо</h1>
-            <button class="add-btn" id="toggle-form-btn">+ Иловаи нав</button>
-        </div>
+<div class="logo">
 
-        <div class="form-container" id="product-form-block">
-            <h2>Илова кардани Маҳсулоти Нав</h2>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Номи маҳсулот</label>
-                    <input type="text" id="p-title" placeholder="Масалан: GTA San Andreas Mod">
-                </div>
-                <div class="form-group">
-                    <label>Версия</label>
-                    <input type="text" id="p-version" placeholder="Масалан: v2.10">
-                </div>
-                <div class="form-group">
-                    <label>Ҳаҷм (Size)</label>
-                    <input type="text" id="p-size" placeholder="Масалан: 45 MB ё 1.2 GB">
-                </div>
-                <div class="form-group">
-                    <label>Категория</label>
-                    <select id="p-category">
-                        <option value="Games">Бозиҳо (Games)</option>
-                        <option value="Apps">Барномаҳо (Apps)</option>
-                        <option value="Mods">Модҳо (Mods)</option>
-                        <option value="Windows">Барои Компютер (PC)</option>
-                    </select>
-                </div>
-                <div class="form-group full-width">
-                    <label>Линки Расм (Cloudinary URL)</label>
-                    <input type="text" id="p-image" placeholder="https://res.cloudinary.com/...">
-                </div>
-                <div class="form-group full-width">
-                    <label>Линки Боргирӣ (Download Link)</label>
-                    <input type="text" id="p-download" placeholder="Линки файл аз Mega, Google Drive ва ғайра">
-                </div>
-                <div class="form-group full-width">
-                    <label>Тавсиф (Description)</label>
-                    <textarea id="p-desc" placeholder="Дар бораи маҳсулот маълумот нависед..."></textarea>
-                </div>
-            </div>
-            <button class="save-btn" id="save-product-btn">САБТ КАРДАН БА БАЗА</button>
-        </div>
+ZEROHUB
 
-        <h2>Рӯйхати Маҳсулотҳои Сайти Шумо</h2>
-        <table class="products-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Расм</th>
-                    <th>Номи Маҳсулот</th>
-                    <th>Категория</th>
-                    <th>Версия</th>
-                    <th>Амал</th>
-                </tr>
-            </thead>
-            <tbody id="products-list-tbody">
-                </tbody>
-        </table>
-    </div>
+</div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<input
 
-    <script src="admin.js"></script>
+type="search"
+
+class="search"
+
+placeholder="Ҷустуҷӯи барнома...">
+
+</header>
+
+<div class="container"
+
+id="productsContainer">
+  </div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+getDatabase,
+
+ref,
+
+onValue
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig={
+
+apiKey:"AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
+
+authDomain:"zerohub2010.firebaseapp.com",
+
+databaseURL:"https://zerohub2010-default-rtdb.firebaseio.com",
+
+projectId:"zerohub2010",
+
+storageBucket:"zerohub2010.firebasestorage.app",
+
+messagingSenderId:"10761752021",
+
+appId:"1:10761752021:web:891c5494e298f2c21e815c"
+
+};
+
+const app=initializeApp(firebaseConfig);
+
+const db=getDatabase(app);
+
+const productsRef=ref(db,"products_v2");
+
+const container=document.getElementById("productsContainer");
+
+onValue(productsRef,(snapshot)=>{
+
+const data=snapshot.val();
+
+container.innerHTML="";
+
+if(!data){
+
+container.innerHTML="<h2>Ҳоло ягон маҳсулот нест.</h2>";
+
+return;
+
+}
+
+Object.keys(data).reverse().forEach(key=>{
+
+const p=data[key];
+
+container.innerHTML+=`
+
+<div class="card">
+
+<img src="${p.image}" alt="">
+
+<div class="info">
+
+<div class="title">${p.title}</div>
+
+<div class="meta">
+
+${p.category} • ${p.version}<br>
+
+${p.size}
+
+</div>
+
+<a class="download"
+
+href="${p.link}"
+
+target="_blank">
+
+Download
+
+</a>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+});
+const search=document.querySelector(".search");
+
+search.addEventListener("input",()=>{
+
+const value=search.value.toLowerCase();
+
+const cards=document.querySelectorAll(".card");
+
+cards.forEach(card=>{
+
+const text=card.innerText.toLowerCase();
+
+card.style.display=text.includes(value)?"block":"none";
+
+});
+
+});
+
+window.addEventListener("load",()=>{
+
+document.body.style.opacity="0";
+
+setTimeout(()=>{
+
+document.body.style.transition=".4s";
+
+document.body.style.opacity="1";
+
+},100);
+
+});
+
+document.title="ZEROHUB Products";
+window.addEventListener("online",()=>{
+
+console.log("Internet Connected");
+
+});
+
+window.addEventListener("offline",()=>{
+
+alert("Интернет қатъ шудааст!");
+
+});
+
+history.pushState(null,null,location.href);
+
+window.onpopstate=function(){
+
+history.go(1);
+
+};
+
+localStorage.setItem("zerohub_products","ready");
+console.log("ZEROHUB Products Loaded");
+
+</script>
 
 </body>
+
 </html>
