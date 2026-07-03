@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEROHUB - Просмотр приложения</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Стилҳои махсус барои Саҳифаи Маҳсулот (Google Play Premium Style) */
+        .product-container { margin-top: 40px; display: flex; flex-direction: column; gap: 30px; }
+        .product-main { display: flex; gap: 30px; align-items: center; background: var(--bg-card); padding: 30px; border-radius: 24px; border: 1px solid var(--border-color); }
+        .product-icon { width: 140px; height: 140px; border-radius: 28px; object-fit: cover; background: var(--bg-nav); }
+        .product-info { flex: 1; }
+        .product-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .product-id { color: var(--primary); font-weight: 600; font-size: 14px; margin-bottom: 12px; display: inline-block; }
+        .product-meta-row { display: flex; gap: 24px; color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+        .product-meta-row span strong { color: var(--text-main); }
+        .btn-download { background: var(--primary); color: #000000; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: var(--transition-smooth); }
+        .btn-download:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: var(--shadow-premium); }
+        
+        /* Скриншотҳо ва Трейлер */
+        .media-section { background: var(--bg-card); padding: 30px; border-radius: 24px; border: 1px solid var(--border-color); }
+        .media-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+        .screenshots-gallery { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 10px; }
+        .screenshots-gallery img { height: 220px; border-radius: 14px; object-fit: cover; border: 1px solid var(--border-color); }
+        .trailer-wrapper { margin-top: 24px; width: 100%; max-width: 700px; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-color); background: #000; }
+        .trailer-wrapper iframe, .trailer-wrapper video { width: 100%; height: 100%; border: none; }
+        
+        /* Тавсиф */
+        .description-section { background: var(--bg-card); padding: 30px; border-radius: 24px; border: 1px solid var(--border-color); }
+        .description-text { color: var(--text-muted); white-space: pre-line; line-height: 1.7; font-size: 15px; }
+
+        @media (max-width: 768px) {
+            .product-main { flex-direction: column; text-align: center; padding: 20px; }
+            .product-meta-row { flex-direction: column; gap: 8px; align-items: center; }
+            .btn-download { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <a href="index.html" class="logo">ZERO<span>HUB</span></a>
+            </div>
+            <nav class="nav-links">
+                <a href="index.html"><i class="fa-solid fa-house"></i> <span class="nav-home">Главная</span></a>
+                <a href="products.html?type=apps"><i class="fa-solid fa-mobile-screen-button"></i> <span class="nav-apps">Приложения</span></a>
+                <a href="products.html?type=games"><i class="fa-solid fa-gamepad"></i> <span class="nav-games">Игры</span></a>
+            </nav>
+            <div class="user-actions">
+                <a href="../admin/login.html" class="admin-link-btn"><i class="fa-solid fa-gauge-high"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container product-container">
+        <section class="product-main">
+            <img src="" id="appIcon" class="product-icon" alt="Icon">
+            <div class="product-info">
+                <span id="appId" class="product-id">ZH-XXXXXX</span>
+                <h1 id="appTitle" class="product-title">Загрузка...</h1>
+                <div class="product-meta-row">
+                    <span id="metaVersion">Версия: <strong>-</strong></span>
+                    <span id="metaSize">Размер: <strong>-</strong></span>
+                    <span id="metaDate">Обновлено: <strong>-</strong></span>
+                </div>
+                <a href="#" id="downloadBtn" target="_blank" class="btn-download">
+                    <i class="fa-brands fa-telegram"></i> <span id="btnText">СКАЧАТЬ</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="media-section" id="mediaSection" style="display: none;">
+            <h2 class="media-title" id="mediaTitle">Медиа и Скриншоты</h2>
+            <div class="screenshots-gallery" id="screenshotsGallery">
+                </div>
+            <div class="trailer-wrapper" id="trailerContainer" style="display: none;">
+                </div>
+        </section>
+
+        <section class="description-section">
+            <h2 class="media-title" id="descTitle">Описание</h2>
+            <p id="appDescription" class="description-text">Загрузка описания приложения...</p>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 ZEROHUB Platform. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="product.js"></script>
+</body>
+</html>
