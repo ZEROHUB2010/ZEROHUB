@@ -15,16 +15,23 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+// Ин танзимот тирезаро маҷбур мекунад, ки аккаунтҳои Google-ро нишон диҳад
+provider.setCustomParameters({
+    prompt: 'select_account'
+});
+
 const ADMIN_EMAIL = "azizzodavalijon2010@gmail.com";
 const errorBox = document.getElementById('errorBox');
 
-// Ин қисм худкор натиҷаи вурудро пас аз редирект месанҷад
+// 1. Санҷиши худкори натиҷа пас аз бозгашт аз Google
 getRedirectResult(auth)
     .then((result) => {
         if (result && result.user) {
             const user = result.user;
+            
             if (user.email === ADMIN_EMAIL) {
-                window.location.href = 'dashboard.html';
+                // Агар почтаи ту бошад, рост ба панел мегузарӣ
+                window.location.replace('dashboard.html');
             } else {
                 if (errorBox) {
                     errorBox.innerText = "Дастрасӣ рад шуд! Шумо админи ин сайт нестед.";
@@ -35,17 +42,22 @@ getRedirectResult(auth)
         }
     })
     .catch((error) => {
+        console.error("Хатогии Firebase:", error);
         if (errorBox) {
-            errorBox.innerText = "Хатогии Firebase: " + error.message;
+            errorBox.innerText = "Хатогӣ: " + error.message;
             errorBox.style.display = 'block';
         }
     });
 
-// Пахши тугма одамро рост ба сайти расмии Google мебарад
+// 2. Пахши тугма бе ларзиши зиёдатӣ
 const loginBtn = document.getElementById('googleLoginBtn');
 if (loginBtn) {
-    loginBtn.addEventListener('click', () => {
+    loginBtn.addEventListener('click', (e) => {
+        e.preventDefault(); // Аниматсия ва ларзиши тугмаро блок мекунад
+        
         if (errorBox) errorBox.style.display = 'none';
+        
+        // Гузариши расмӣ ба Google
         signInWithRedirect(auth, provider);
     });
 }
