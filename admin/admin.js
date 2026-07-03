@@ -1,5 +1,5 @@
 // Ин коди пинҳоншудаи "zerohub2026" аст, ки дар GitHub ҳамин хел меистад:
-const ENCRYPTED_PASSWORD = "emVyb2h1YjIwMjY="; 
+const ENCRYPTED_PASSWORD =zerohub2010
 
 const errorBox = document.getElementById('errorBox');
 
