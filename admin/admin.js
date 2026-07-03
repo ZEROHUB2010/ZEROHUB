@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
@@ -16,33 +16,36 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 const ADMIN_EMAIL = "azizzodavalijon2010@gmail.com";
+const errorBox = document.getElementById('errorBox');
 
-const loginBtn = document.getElementById('googleLoginBtn');
-
-if (loginBtn) {
-    loginBtn.addEventListener('click', () => {
-        const errorBox = document.getElementById('errorBox');
-        if (errorBox) errorBox.style.display = 'none';
-
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                const user = result.user;
-                
-                if (user.email === ADMIN_EMAIL) {
-                    window.location.href = 'dashboard.html';
-                } else {
-                    if (errorBox) {
-                        errorBox.innerText = "Дастрасӣ рад шуд! Шумо админи ин сайт нестед.";
-                        errorBox.style.display = 'block';
-                    }
-                    signOut(auth);
-                }
-            })
-            .catch((error) => {
+// Ин қисм худкор натиҷаи вурудро пас аз редирект месанҷад
+getRedirectResult(auth)
+    .then((result) => {
+        if (result && result.user) {
+            const user = result.user;
+            if (user.email === ADMIN_EMAIL) {
+                window.location.href = 'dashboard.html';
+            } else {
                 if (errorBox) {
-                    errorBox.innerText = "Хатогӣ ҳангоми вуруд: " + error.message;
+                    errorBox.innerText = "Дастрасӣ рад шуд! Шумо админи ин сайт нестед.";
                     errorBox.style.display = 'block';
                 }
-            });
+                signOut(auth);
+            }
+        }
+    })
+    .catch((error) => {
+        if (errorBox) {
+            errorBox.innerText = "Хатогии Firebase: " + error.message;
+            errorBox.style.display = 'block';
+        }
+    });
+
+// Пахши тугма одамро рост ба сайти расмии Google мебарад
+const loginBtn = document.getElementById('googleLoginBtn');
+if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+        if (errorBox) errorBox.style.display = 'none';
+        signInWithRedirect(auth, provider);
     });
 }
