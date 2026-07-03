@@ -1,2 +1,0 @@
-# ZEROHUB
-Official ZEROHUB website
