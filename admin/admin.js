@@ -18,41 +18,35 @@ const provider = new GoogleAuthProvider();
 const ADMIN_EMAIL = "azizzodavalijon2010@gmail.com";
 const errorBox = document.getElementById('errorBox');
 
-// 1. АВВАЛ ПАЙДО КАРДАНИ САБТИ КӮҲНА: Агар телефон аллакай сабт шуда бошад, рост мегузарад
 if (localStorage.getItem("admin_logged_in") === "true") {
     window.location.replace('dashboard.html');
 }
 
-// 2. САНҶИШИ БОЗГАШТ АЗ GOOGLE ВА САБТ КАРДАН ДАР ХОТИРАИ ТЕЛЕФОН
+// ТЕСТ КАРДАНИ ХАТОГӢ: Ин қисм агар хатогӣ бошад, ба ту дар экран СУОЛУ ҶАВОБ медиҳад
 getRedirectResult(auth)
     .then((result) => {
         if (result && result.user) {
             const user = result.user;
+            alert("Шумо бомуваффақият ворид шудед: " + user.email); // Барои санҷиш
             
             if (user.email === ADMIN_EMAIL) {
-                // ИНА ХАМАН ФУНКСИЯИ САБТ КАРДАН ДАР ХОТИРАИ ТЕЛЕФОН!
                 localStorage.setItem("admin_logged_in", "true");
-                
-                // Рост ба панел мегузарад
                 window.location.replace('dashboard.html');
             } else {
-                if (errorBox) {
-                    errorBox.innerText = "Дастрасӣ рад шуд! Шумо админи ин сайт нестед.";
-                    errorBox.style.display = 'block';
-                }
+                alert("Почтаи хато! Шумо админ нестед.");
                 signOut(auth);
             }
         }
     })
     .catch((error) => {
-        console.error("Хатогии Firebase:", error);
+        // МАНА ИН ҶО: Агар Firebase ягон хатогӣ диҳад, рост дар телефони ту тирезаи калон кушода мешавад!
+        alert("ХАТОГИИ АСЛӢ: " + error.code + " -> " + error.message);
         if (errorBox) {
             errorBox.innerText = "Хатогӣ: " + error.message;
             errorBox.style.display = 'block';
         }
     });
 
-// 3. ПАХШИ ТУГМАИ ВУРУД
 const loginBtn = document.getElementById('googleLoginBtn');
 if (loginBtn) {
     loginBtn.addEventListener('click', (e) => {
