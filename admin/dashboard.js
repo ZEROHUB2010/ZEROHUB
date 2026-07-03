@@ -1,5 +1,4 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -13,15 +12,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getDatabase(app);
 
-// 🔥 ТАНҲО САНҶИШИ САБТИ ТЕЛЕФОН: Дигар Firebase туро блок карда наметавонад!
+// Санҷиши амният: Агар рамзро назада бошад, умуман иҷозати даромадан намедиҳад
 if (localStorage.getItem("admin_logged_in") !== "true") {
     window.location.replace('login.html');
 }
 
-// Бор кардани омор
+// Бор кардани омори барномаҳо аз база
 const productsRef = ref(db, 'products');
 onValue(productsRef, (snapshot) => {
     if (snapshot.exists()) {
@@ -31,7 +29,7 @@ onValue(productsRef, (snapshot) => {
     }
 });
 
-// Илова кардани бозӣ
+// Формаи илова кардани бозӣ/барнома ба базаи Firebase
 const form = document.getElementById('addProductForm');
 if (form) {
     form.addEventListener('submit', (e) => {
@@ -57,22 +55,20 @@ if (form) {
 
         push(ref(db, 'products'), newProduct)
             .then(() => {
-                alert("Маҳсулот бомуваффақият илова шуд! 🎉");
+                alert("Маҳсулот бомуваффақият ба база илова шуд! 🎉");
                 form.reset();
             })
             .catch((error) => {
-                alert("Хатогӣ: " + error.message);
+                alert("Хатогӣ ҳангоми сабт: " + error.message);
             });
     });
 }
 
-// Баромад
+// Тугмаи Баромад (Logout)
 const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
         localStorage.removeItem("admin_logged_in");
-        signOut(auth).then(() => {
-            window.location.replace('login.html');
-        });
+        window.location.replace('login.html');
     });
 }
