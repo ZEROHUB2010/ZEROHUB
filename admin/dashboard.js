@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -16,33 +16,26 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-const ADMIN_EMAIL = "azizzodavalijon2010@gmail.com";
+// 🔥 ТАНҲО САНҶИШИ САБТИ ТЕЛЕФОН: Дигар Firebase туро блок карда наметавонад!
+if (localStorage.getItem("admin_logged_in") !== "true") {
+    window.location.replace('login.html');
+}
 
-// 🔥 ПОСБОНИ ПАНЕЛ: Агар админ ворид нашуда бошад, ба логин мепартояд
-onAuthStateChanged(auth, (user) => {
-    if (!user || user.email !== ADMIN_EMAIL) {
-        window.location.replace('login.html');
-    }
-});
-
-// 📊 БОР КАРДАНИ ОМОР АЗ БАЗАИ FIREBASE
+// Бор кардани омор
 const productsRef = ref(db, 'products');
 onValue(productsRef, (snapshot) => {
     if (snapshot.exists()) {
-        const data = snapshot.val();
-        const total = Object.keys(data).length;
-        document.getElementById('statTotalProducts').innerText = total;
+        document.getElementById('statTotalProducts').innerText = Object.keys(snapshot.val()).length;
     } else {
         document.getElementById('statTotalProducts').innerText = "0";
     }
 });
 
-// ➕ ФУНКСИЯИ ИЛОВА КАРДАНИ БОЗӢ/БАРНОМА БА БАЗА
+// Илова кардани бозӣ
 const form = document.getElementById('addProductForm');
 if (form) {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-
         const newProduct = {
             titleRu: document.getElementById('prodTitleRu').value,
             titleEn: document.getElementById('prodTitleEn').value,
@@ -62,22 +55,22 @@ if (form) {
             date: new Date().toISOString()
         };
 
-        const newProdRef = push(ref(db, 'products'));
-        set(newProdRef, newProduct)
+        push(ref(db, 'products'), newProduct)
             .then(() => {
-                alert("Маҳсулот бомуваффақият ба база илова шуд! 🎉");
+                alert("Маҳсулот бомуваффақият илова шуд! 🎉");
                 form.reset();
             })
             .catch((error) => {
-                alert("Хатогӣ ҳангоми сабт: " + error.message);
+                alert("Хатогӣ: " + error.message);
             });
     });
 }
 
-// 🚪 ТУГМАИ БАРОМАД (LOGOUT)
+// Баромад
 const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem("admin_logged_in");
         signOut(auth).then(() => {
             window.location.replace('login.html');
         });
