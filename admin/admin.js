@@ -1,47 +1,33 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
-    authDomain: "zerohub2010.firebaseapp.com",
-    databaseURL: "https://zerohub2010-default-rtdb.firebaseio.com",
-    projectId: "zerohub2010",
-    storageBucket: "zerohub2010.firebasestorage.app",
-    messagingSenderId: "10761752021",
-    appId: "1:10761752021:web:891c5494e298f2c21e815c"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
 const ADMIN_EMAIL = "azizzodavalijon2010@gmail.com";
+const ADMIN_PASSWORD = "zerohub2026"; // 🔥 ИН ҶО РАМЗИ МАХФИИ ТУСТ!
 
-// Агар аллакай сабт бошад, рост гузарад
+const errorBox = document.getElementById('errorBox');
+
+// Агар аллакай ворид шуда бошад, рост ба панел гузарад
 if (localStorage.getItem("admin_logged_in") === "true") {
     window.location.replace('dashboard.html');
 }
 
-getRedirectResult(auth)
-    .then((result) => {
-        if (result && result.user) {
-            if (result.user.email === ADMIN_EMAIL) {
-                localStorage.setItem("admin_logged_in", "true");
-                window.location.replace('dashboard.html');
-            } else {
-                alert("Рад шуд! Почтаи бегона.");
-                signOut(auth);
-            }
-        }
-    })
-    .catch((error) => {
-        alert("Хатогии редирект: " + error.message);
-    });
-
 const loginBtn = document.getElementById('googleLoginBtn');
 if (loginBtn) {
+    // Текст ва намуди тугмаро дигар мекунем, то бо имейл шавад
+    loginBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Ворид шудан ба Панел';
+    
     loginBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        signInWithRedirect(auth, provider);
+        if (errorBox) errorBox.style.display = 'none';
+
+        // Як тирезаи хурд кушода мешавад ва рамзро мепурсад
+        const password = prompt("Рамзи махфии Админро ворид кунед:");
+
+        if (password === ADMIN_PASSWORD) {
+            localStorage.setItem("admin_logged_in", "true");
+            window.location.replace('dashboard.html');
+        } else if (password !== null) {
+            if (errorBox) {
+                errorBox.innerText = "Рамзи махфи хато аст! Дастрасӣ рад шуд.";
+                errorBox.style.display = 'block';
+            }
+        }
     });
 }
