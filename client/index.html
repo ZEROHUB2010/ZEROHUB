@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEROHUB - Premium App & Game Market</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <a href="index.html" class="logo">ZERO<span>HUB</span></a>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="index.html" class="active"><i class="fa-solid fa-house"></i> <span class="nav-home">Главная</span></a>
+                <a href="products.html?type=apps"><i class="fa-solid fa-mobile-screen-button"></i> <span class="nav-apps">Приложения</span></a>
+                <a href="products.html?type=games"><i class="fa-solid fa-gamepad"></i> <span class="nav-games">Игры</span></a>
+            </nav>
+
+            <div class="search-box">
+                <form action="search.html" method="GET" id="searchForm">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" name="q" placeholder="Поиск приложений и игр..." required autocomplete="off">
+                </form>
+            </div>
+
+            <div class="user-actions">
+                <a href="../admin/login.html" class="admin-link-btn" title="Панели Админ"><i class="fa-solid fa-gauge-high"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container page-content">
+        
+        <section class="apps-section">
+            <h2 class="section-title" id="titleFeatured">Рекомендуемые <a href="products.html?filter=featured">Смотреть все <i class="fa-solid fa-arrow-right"></i></a></h2>
+            <div class="apps-grid" id="featuredAppsGrid">
+                </div>
+        </section>
+
+        <section class="apps-section">
+            <h2 class="section-title" id="titleNew">Новинки <a href="products.html?filter=new">Смотреть все <i class="fa-solid fa-arrow-right"></i></a></h2>
+            <div class="apps-grid" id="newAppsGrid">
+                </div>
+        </section>
+
+        <section class="apps-section">
+            <h2 class="section-title" id="titlePopular">Популярные <a href="products.html?filter=popular">Смотреть все <i class="fa-solid fa-arrow-right"></i></a></h2>
+            <div class="apps-grid" id="popularAppsGrid">
+                </div>
+        </section>
+
+    </main>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 ZEROHUB Platform. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" id="linkTerms">Условия</a>
+                <a href="#" id="linkPrivacy">Конфиденциальность</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="client.js"></script>
+</body>
+</html>
