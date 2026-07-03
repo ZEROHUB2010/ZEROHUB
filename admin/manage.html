@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEROHUB - Идоракунии Маҳсулот</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-container { margin-top: 30px; display: grid; grid-template-columns: 280px 1fr; gap: 30px; }
+        .admin-sidebar { background: var(--bg-card); border: 1px solid var(--border-color); padding: 24px; border-radius: 20px; height: fit-content; }
+        .sidebar-menu { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .sidebar-menu button { background: none; border: 1px solid transparent; color: var(--text-muted); text-align: left; padding: 12px 16px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: var(--transition-smooth); }
+        .sidebar-menu button:hover, .sidebar-menu button.active { background: var(--bg-hover); color: var(--primary); border-color: var(--border-color); }
+        
+        /* Ҷадвали Маҳсулот */
+        .manage-section { background: var(--bg-card); border: 1px solid var(--border-color); padding: 30px; border-radius: 24px; }
+        .products-table-wrapper { overflow-x: auto; margin-top: 20px; }
+        .products-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        .products-table th, .products-table td { padding: 14px; border-bottom: 1px solid var(--border-color); }
+        .products-table th { color: var(--text-muted); font-weight: 600; background: var(--bg-nav); }
+        .products-table td img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+        
+        .btn-delete { background: rgba(255, 74, 74, 0.1); color: #ff4a4a; border: 1px solid rgba(255, 74, 74, 0.2); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: var(--transition-smooth); }
+        .btn-delete:hover { background: #ff4a4a; color: #ffffff; }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <a href="../client/index.html" class="logo">ZERO<span>HUB</span></a>
+                <span style="font-size: 12px; background: var(--bg-hover); color: var(--primary); padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-weight: bold;">АДМИН</span>
+            </div>
+            <div class="user-actions">
+                <button id="logoutBtn" style="background: none; border: none; color: #ff4a4a; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-right-from-bracket"></i> Баромад</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container admin-container">
+        
+        <aside class="admin-sidebar">
+            <h3 style="font-size: 16px; color: var(--text-muted);">Мудирият</h3>
+            <div class="sidebar-menu">
+                <button onclick="window.location.href='dashboard.html'"><i class="fa-solid fa-plus"></i> Иловаи нав</button>
+                <button class="active"><i class="fa-solid fa-list"></i> Ҳамаи маҳсулот</button>
+            </div>
+        </aside>
+
+        <section class="admin-content">
+            <div class="manage-section">
+                <h2 style="font-size: 20px;"><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Рӯйхати умумии маҳсулот</h2>
+                <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Дар инҷо метавонед оморро бинед ё барномаҳоро пурра нест кунед.</p>
+
+                <div class="products-table-wrapper">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>Иконка</th>
+                                <th>ID</th>
+                                <th>Ном (RU)</th>
+                                <th>Намуд</th>
+                                <th>Просмотр</th>
+                                <th>Скачать</th>
+                                <th>Амал</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminProductsList">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="manage.js"></script>
+</body>
+</html>
