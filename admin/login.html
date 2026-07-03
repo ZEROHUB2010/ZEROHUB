@@ -37,24 +37,20 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
-       const firebaseConfig = {
-  apiKey: "AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
-  authDomain: "zerohub2010.firebaseapp.com",
-  databaseURL: "https://zerohub2010-default-rtdb.firebaseio.com",
-  projectId: "zerohub2010",
-  storageBucket: "zerohub2010.firebasestorage.app",
-  messagingSenderId: "10761752021",
-  appId: "1:10761752021:web:891c5494e298f2c21e815c"
-};
-
-            appId: "YOUR_APP_ID"
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
+            authDomain: "zerohub2010.firebaseapp.com",
+            databaseURL: "https://zerohub2010-default-rtdb.firebaseio.com",
+            projectId: "zerohub2010",
+            storageBucket: "zerohub2010.firebasestorage.app",
+            messagingSenderId: "10761752021",
+            appId: "1:10761752021:web:891c5494e298f2c21e815c"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // Почтаи электронии ягонаи ТУ, ки аллакай худам соз кардам!
         const ADMIN_EMAIL = "azizzodavalijon2010@gmail.com";
 
         document.getElementById('googleLoginBtn').addEventListener('click', () => {
