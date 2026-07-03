@@ -14,7 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Санҷиши амният: Агар рамзро назада бошад, умуман иҷозати даромадан намедиҳад
+// 🔥 ИСЛОҲИ АСОСӢ: Санҷиши оддии сабти телефон (Бе блок кардан)
 if (localStorage.getItem("admin_logged_in") !== "true") {
     window.location.replace('login.html');
 }
