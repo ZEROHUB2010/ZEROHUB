@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithRedirect, onAuthStateChanged, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
@@ -18,23 +18,41 @@ const provider = new GoogleAuthProvider();
 const ADMIN_EMAIL = "azizzodavalijon2010@gmail.com";
 const errorBox = document.getElementById('errorBox');
 
-// 🔥 ПОСБОНИ ХУДКОР: Ин қисм ҳамеша месанҷад, ки кӣ ворид шуд
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // Агар почтаи ту бошад, рост ба панел мегузарӣ
-        if (user.email === ADMIN_EMAIL) {
-            window.location.href = 'dashboard.html';
-        } else {
-            if (errorBox) {
-                errorBox.innerText = "Дастрасӣ рад шуд! Шумо админи ин сайт нестед.";
-                errorBox.style.display = 'block';
-            }
-            signOut(auth);
-        }
-    }
-});
+// 1. АВВАЛ ПАЙДО КАРДАНИ САБТИ КӮҲНА: Агар телефон аллакай сабт шуда бошад, рост мегузарад
+if (localStorage.getItem("admin_logged_in") === "true") {
+    window.location.replace('dashboard.html');
+}
 
-// Пахши тугма барои гузариш ба Google
+// 2. САНҶИШИ БОЗГАШТ АЗ GOOGLE ВА САБТ КАРДАН ДАР ХОТИРАИ ТЕЛЕФОН
+getRedirectResult(auth)
+    .then((result) => {
+        if (result && result.user) {
+            const user = result.user;
+            
+            if (user.email === ADMIN_EMAIL) {
+                // ИНА ХАМАН ФУНКСИЯИ САБТ КАРДАН ДАР ХОТИРАИ ТЕЛЕФОН!
+                localStorage.setItem("admin_logged_in", "true");
+                
+                // Рост ба панел мегузарад
+                window.location.replace('dashboard.html');
+            } else {
+                if (errorBox) {
+                    errorBox.innerText = "Дастрасӣ рад шуд! Шумо админи ин сайт нестед.";
+                    errorBox.style.display = 'block';
+                }
+                signOut(auth);
+            }
+        }
+    })
+    .catch((error) => {
+        console.error("Хатогии Firebase:", error);
+        if (errorBox) {
+            errorBox.innerText = "Хатогӣ: " + error.message;
+            errorBox.style.display = 'block';
+        }
+    });
+
+// 3. ПАХШИ ТУГМАИ ВУРУД
 const loginBtn = document.getElementById('googleLoginBtn');
 if (loginBtn) {
     loginBtn.addEventListener('click', (e) => {
