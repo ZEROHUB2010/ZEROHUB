@@ -16,42 +16,32 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 const ADMIN_EMAIL = "azizzodavalijon2010@gmail.com";
-const errorBox = document.getElementById('errorBox');
 
+// Агар аллакай сабт бошад, рост гузарад
 if (localStorage.getItem("admin_logged_in") === "true") {
     window.location.replace('dashboard.html');
 }
 
-// ТЕСТ КАРДАНИ ХАТОГӢ: Ин қисм агар хатогӣ бошад, ба ту дар экран СУОЛУ ҶАВОБ медиҳад
 getRedirectResult(auth)
     .then((result) => {
         if (result && result.user) {
-            const user = result.user;
-            alert("Шумо бомуваффақият ворид шудед: " + user.email); // Барои санҷиш
-            
-            if (user.email === ADMIN_EMAIL) {
+            if (result.user.email === ADMIN_EMAIL) {
                 localStorage.setItem("admin_logged_in", "true");
                 window.location.replace('dashboard.html');
             } else {
-                alert("Почтаи хато! Шумо админ нестед.");
+                alert("Рад шуд! Почтаи бегона.");
                 signOut(auth);
             }
         }
     })
     .catch((error) => {
-        // МАНА ИН ҶО: Агар Firebase ягон хатогӣ диҳад, рост дар телефони ту тирезаи калон кушода мешавад!
-        alert("ХАТОГИИ АСЛӢ: " + error.code + " -> " + error.message);
-        if (errorBox) {
-            errorBox.innerText = "Хатогӣ: " + error.message;
-            errorBox.style.display = 'block';
-        }
+        alert("Хатогии редирект: " + error.message);
     });
 
 const loginBtn = document.getElementById('googleLoginBtn');
 if (loginBtn) {
     loginBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (errorBox) errorBox.style.display = 'none';
         signInWithRedirect(auth, provider);
     });
 }
