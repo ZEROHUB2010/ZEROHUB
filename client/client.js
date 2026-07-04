@@ -1,4 +1,4 @@
-// client/client.js - ZEROHUB Client Engine (RU/EN Support)
+// client/client.js - ZEROHUB Client Engine (With Live Search)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
@@ -16,6 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 let currentLang = localStorage.getItem('zh_lang') || 'ru';
+let allProducts = []; // Барои нигоҳ доштани ҳамаи маҳсулот ҳангоми ҷустуҷӯ
 
 const i18n = {
     ru: { searchPlaceholder: "Поиск приложений и игр...", home: "Главная", apps: "Приложения", games: "Игры", featured: "Рекомендуемые", newReleases: "Новинки", popular: "Популярные", viewAll: "Смотреть все", noApps: "Нет доступных приложений.", terms: "Условия", privacy: "Конфиденциальность" },
@@ -26,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupLanguageSwitcher();
     applyLanguageStrings();
     loadMainPageProducts();
+    setupSearch(); // 🔥 Фаъол кардани ҷустуҷӯ
 });
 
 function setupLanguageSwitcher() {
@@ -79,14 +81,14 @@ function loadMainPageProducts() {
             return;
         }
 
-        // 🔥 МУҲИМ: Ин ҷо ID-и ҳақиқиро аз калиди Firebase мегирем
-        const productsList = Object.keys(data).map(key => {
+        // Сабти ҳамаи маҳсулот дар массив
+        allProducts = Object.keys(data).map(key => {
             return { firebaseId: key, ...data[key] };
         });
 
-        const featuredProducts = productsList.filter(p => p.isFeatured || p.featured).slice(0, 4);
-        const newProducts = [...productsList].reverse().slice(0, 4);
-        const popularProducts = [...productsList].sort((a, b) => (b.downloads || 0) - (a.downloads || 0)).slice(0, 4);
+        const featuredProducts = allProducts.filter(p => p.isFeatured || p.featured).slice(0, 4);
+        const newProducts = [...allProducts].reverse().slice(0, 4);
+        const popularProducts = [...allProducts].sort((a, b) => (b.downloads || 0) - (a.downloads || 0)).slice(0, 4);
 
         renderGrid(featuredProducts, featuredGrid);
         renderGrid(newProducts, newGrid);
@@ -94,17 +96,55 @@ function loadMainPageProducts() {
     });
 }
 
+// 🔥 Функсияи нав барои ҷустуҷӯ
+function setupSearch() {
+    const searchInput = document.querySelector('.search-box input');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const featuredGrid = document.getElementById('featuredAppsGrid');
+        const sections = document.querySelectorAll('.apps-section'); // Блокҳои Новинки ва Популярные
+
+        if (!featuredGrid) return;
+
+        if (query === '') {
+            // Агар ҷустуҷӯ холӣ бошад, сайт ба ҳолати аввала бармегардад
+            sections.forEach(s => s.style.display = 'block');
+            if (document.getElementById('titleFeatured')) {
+                document.getElementById('titleFeatured').style.display = 'block';
+            }
+            loadMainPageProducts();
+            return;
+        }
+
+        // Пинҳон кардани блокҳои дигар ҳангоми ҷустуҷӯ
+        sections.forEach(s => s.style.display = 'none');
+        if (document.getElementById('titleFeatured')) {
+            document.getElementById('titleFeatured').innerHTML = currentLang === 'ru' ? 'Результаты поиска' : 'Search Results';
+        }
+
+        // Филтр кардани маҳсулот аз рӯи номи RU ва EN
+        const filtered = allProducts.filter(item => {
+            const titleRu = (item.titleRu || '').toLowerCase();
+            const titleEn = (item.titleEn || '').toLowerCase();
+            return titleRu.includes(query) || titleEn.includes(query);
+        });
+
+        featuredGrid.innerHTML = '';
+        renderGrid(filtered, featuredGrid);
+    });
+}
+
 function renderGrid(items, targetGrid) {
     if (items.length === 0) {
-        targetGrid.innerHTML = `<div style="color:var(--text-muted); padding:20px;">${i18n[currentLang].noApps}</div>`;
+        targetGrid.innerHTML = `<div style="color:var(--text-muted); padding:20px;">${i18n[currentLang].noApps || 'Ничего не найдено'}</div>`;
         return;
     }
 
     items.forEach(item => {
         const title = currentLang === 'ru' ? (item.titleRu || item.title) : (item.titleEn || item.title);
         const iconSrc = item.iconUrl || 'https://via.placeholder.com/100';
-        
-        // Пайдо кардани ID-и дуруст барои линк
         const finalId = item.firebaseId || item.id;
 
         const card = document.createElement('div');
@@ -124,7 +164,6 @@ function renderGrid(items, targetGrid) {
             <a href="#" class="download-btn-grid" title="Скачать"><i class="fa-solid fa-arrow-down"></i></a>
         `;
         
-        // 🔥 Гузариши 100% дуруст бо ID-и мушаххас
         card.addEventListener('click', (e) => {
             e.preventDefault();
             window.location.href = `product.html?id=${finalId}`;
