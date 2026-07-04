@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zerohub2010.firebaseapp.com/sitemap.xml
