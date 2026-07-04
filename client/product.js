@@ -1,133 +1,97 @@
-// client/product.js - ZEROHUB Product Details Page Engine
-import { dbService } from '../firebase.js';
+// product.js - ZEROHUB Product Details Page Engine
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Танзимоти забон
-let currentLang = localStorage.getItem('zh_lang') || 'ru';
-
-const i18n = {
-    ru: {
-        home: "Главная", apps: "Приложения", games: "Игры",
-        version: "Версия", size: "Размер", date: "Обновлено",
-        download: "Скачать через Telegram", mediaTitle: "Медиа и Скриншоты",
-        descTitle: "Описание", loadingError: "Приложение не найдено или удалено."
-    },
-    en: {
-        home: "Home", apps: "Apps", games: "Games",
-        version: "Version", size: "Size", date: "Updated",
-        download: "Download via Telegram", mediaTitle: "Media & Screenshots",
-        descTitle: "Description", loadingError: "Application not found or deleted."
-    }
+// Конфиги Firebase-и ту
+const firebaseConfig = {
+  apiKey: "AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
+  authDomain: "zerohub2010.firebaseapp.com",
+  databaseURL: "https://zerohub2010-default-rtdb.firebaseio.com",
+  projectId: "zerohub2010",
+  storageBucket: "zerohub2010.firebasestorage.app",
+  messagingSenderId: "10761752021",
+  appId: "1:10761752021:web:891c5494e298f2c21e815c",
+  measurementId: "G-7MM70103ZZ"
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
-    applyLanguage();
-    await loadProductDetails();
-});
+// Инициализатсия
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
-function applyLanguage() {
-    document.querySelector('.nav-home').innerText = i18n[currentLang].home;
-    document.querySelector('.nav-apps').innerText = i18n[currentLang].apps;
-    document.querySelector('.nav-games').innerText = i18n[currentLang].games;
-    document.getElementById('mediaTitle').innerText = i18n[currentLang].mediaTitle;
-    document.getElementById('descTitle').innerText = i18n[currentLang].descTitle;
-}
+let currentLang = localStorage.getItem('zh_lang') || 'ru';
 
-async function loadProductDetails() {
-    // Гирифтани ID аз URL (масалан: product.html?id=-O123456)
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
+// Гирифтани ID-и маҳсулот аз линки саҳифа (URL)
+const urlParams = new URLSearchParams(window.location.search);
+const productId = urlParams.get('id');
 
+document.addEventListener('DOMContentLoaded', () => {
     if (!productId) {
         showError();
         return;
     }
+    loadProductDetails();
+});
 
-    try {
-        const product = await dbService.getProductById(productId);
+// Функсияи боркунии маълумоти маҳсулот
+function loadProductDetails() {
+    // 🔥 МУҲИМ: Пайвастшавӣ рост ба папкаи 'products' ва ID-и махсуси он
+    const productRef = ref(database, `products/${productId}`);
 
-        if (!product) {
+    onValue(productRef, (snapshot) => {
+        const item = snapshot.val();
+
+        if (!item) {
             showError();
             return;
         }
 
-        // Зиёд кардани ҳисобкунаки Просмотр (Views) худкор дар база
-        await dbService.incrementCounter(productId, 'views');
-
-        // Пур кардани маълумоти статикӣ
-        const title = currentLang === 'ru' ? (product.title_ru || product.title) : (product.title_en || product.title);
-        const description = currentLang === 'ru' ? (product.description_ru || product.description) : (product.description_en || product.description);
-
-        document.getElementById('appTitle').innerText = title;
-        document.getElementById('appId').innerText = product.id;
-        document.getElementById('appIcon').src = product.media.icon || '../assets/default-icon.png';
+        // Аниқ кардани ном ва тавсифи маҳсулот вобаста ба забон
+        const title = currentLang === 'ru' ? (item.titleRu || item.title_ru || item.title) : (item.titleEn || item.title_en || item.title);
+        const description = currentLang === 'ru' ? (item.descRu || item.description_ru || item.description) : (item.descEn || item.description_en || item.description);
         
-        document.getElementById('metaVersion').innerHTML = `${i18n[currentLang].version}: <strong>${product.version}</strong>`;
-        document.getElementById('metaSize').innerHTML = `${i18n[currentLang].size}: <strong>${product.size}</strong>`;
+        // Нишони акс (иконка)
+        const iconSrc = item.iconUrl || item.image || (item.media && item.media.icon) || '../assets/default-icon.png';
         
-        // Формати санаи худкор
-        const formattedDate = new Date(product.createdAt).toLocaleDateString(currentLang === 'ru' ? 'ru-RU' : 'en-US');
-        document.getElementById('metaDate').innerHTML = `${i18n[currentLang].date}: <strong>${formattedDate}</strong>`;
+        // Маълумоти техникӣ
+        const version = item.version || '1.0.0';
+        const size = item.size || '26.3 MB';
+        const developer = item.developer || 'ZEROHUB';
+        const updated = item.updated || '2026';
 
-        document.getElementById('appDescription').innerText = description;
-
-        // Танзими тугмаи Telegram ва ҳисобкунаки скачат
-        const downloadBtn = document.getElementById('downloadBtn');
-        document.getElementById('btnText').innerText = i18n[currentLang].download;
-        downloadBtn.href = product.downloadUrl; // Линки канали Телеграми ту
+        // Элементҳои саҳифаро пайдо мекунем ва маълумотро мечаспонем
+        const appTitleEl = document.querySelector('.app-title') || document.getElementById('appTitle');
+        const appIconEl = document.querySelector('.app-icon') || document.getElementById('appIcon');
+        const appDevEl = document.querySelector('.app-developer') || document.getElementById('appDeveloper');
+        const appDescEl = document.querySelector('.app-description') || document.getElementById('appDescription');
         
-        downloadBtn.addEventListener('click', () => {
-            dbService.incrementCounter(productId, 'downloads'); // Ҳисоби худкори скачат
-        });
+        if (appTitleEl) appTitleEl.innerText = title;
+        if (appIconEl) appIconEl.src = iconSrc;
+        if (appDevEl) appDevEl.innerText = developer;
+        if (appDescEl) appDescEl.innerText = description || (currentLang === 'ru' ? 'Описание отсутствует.' : 'No description available.');
 
-        // Боркунии Скриншотҳо ва Видео (Агар мавҷуд бошанд)
-        let hasMedia = false;
-        const gallery = document.getElementById('screenshotsGallery');
-        gallery.innerHTML = '';
+        // Навсозии ҷадвали техникӣ (Версия, Размер, Обновлено)
+        const versionEl = document.getElementById('appVersion');
+        const sizeEl = document.getElementById('appSize');
+        const updatedEl = document.getElementById('appUpdated');
 
-        if (product.media && product.media.screenshots && product.media.screenshots.length > 0) {
-            hasMedia = true;
-            product.media.screenshots.forEach(src => {
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = "Screenshot";
-                gallery.appendChild(img);
-            });
+        if (versionEl) versionEl.innerText = version;
+        if (sizeEl) sizeEl.innerText = size;
+        if (updatedEl) updatedEl.innerText = updated;
+
+        // Тугмаи скачат кардан (Download URL)
+        const downloadBtn = document.querySelector('.download-btn') || document.getElementById('downloadBtn');
+        if (downloadBtn) {
+            downloadBtn.href = item.downloadUrl || item.downloadURL || '#';
         }
-
-        // Боркунии Трейлери Видео (YouTube ё файл)
-        const trailerContainer = document.getElementById('trailerContainer');
-        trailerContainer.innerHTML = '';
-        
-        if (product.media && product.media.trailer) {
-            hasMedia = true;
-            trailerContainer.style.display = 'block';
-            
-            if (product.media.trailer.includes('youtube.com') || product.media.trailer.includes('youtu.be')) {
-                // Агар линки YouTube бошад, ба iframe табдил медиҳад
-                let embedUrl = product.media.trailer.replace("watch?v=", "embed/");
-                if(embedUrl.includes('youtu.be/')) {
-                    embedUrl = embedUrl.replace("youtu.be/", "youtube.com/embed/");
-                }
-                trailerContainer.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-            } else {
-                // Агар линки оддии файл бошад, плеери HTML5 мемонад
-                trailerContainer.innerHTML = `<video src="${product.media.trailer}" controls></video>`;
-            }
-        }
-
-        if (hasMedia) {
-            document.getElementById('mediaSection').style.display = 'block';
-        }
-
-    } catch (error) {
-        console.error("Хатогӣ дар боркунии маҳсулот:", error);
-        showError();
-    }
+    });
 }
 
+// Функсия дар ҳолати хатогӣ ё набудани маҳсулот
 function showError() {
-    document.getElementById('appTitle').innerText = i18n[currentLang].loadingError;
-    document.getElementById('appDescription').innerText = "";
-    document.querySelector('.product-main').style.opacity = "0.5";
-    document.getElementById('downloadBtn').style.display = "none";
+    const container = document.querySelector('.page-content') || document.body;
+    // Агар блокҳои тайёри хатогӣ дар HTML бошанд, матни онҳоро иваз мекунем
+    const errorTitle = document.getElementById('errorTitle') || document.querySelector('.error-message');
+    if (errorTitle) {
+        errorTitle.innerText = currentLang === 'ru' ? "Приложение не найдено или удалено." : "Application not found or deleted.";
+    }
 }
