@@ -20,77 +20,100 @@ const database = getDatabase(app);
 
 let currentLang = localStorage.getItem('zh_lang') || 'ru';
 
-// Гирифтани ID-и маҳсулот аз линки саҳифа (URL)
+// Гирифтани ID-и маҳсулот аз URL
 const urlParams = new URLSearchParams(window.location.search);
 const productId = urlParams.get('id');
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!productId) {
+        console.error("ID-и маҳсулот дар линк ёфт нашуд!");
         showError();
         return;
     }
     loadProductDetails();
 });
 
-// Функсияи боркунии маълумоти маҳсулот
 function loadProductDetails() {
-    // 🔥 МУҲИМ: Пайвастшавӣ рост ба папкаи 'products' ва ID-и махсуси он
+    // Пайвастшавӣ ба папкаи products
     const productRef = ref(database, `products/${productId}`);
 
     onValue(productRef, (snapshot) => {
         const item = snapshot.val();
 
         if (!item) {
+            console.error("Маҳсулот бо ин ID дар Firebase ёфт нашуд:", productId);
             showError();
             return;
         }
 
-        // Аниқ кардани ном ва тавсифи маҳсулот вобаста ба забон
+        // Аниқ кардани ном ва тавсиф
         const title = currentLang === 'ru' ? (item.titleRu || item.title_ru || item.title) : (item.titleEn || item.title_en || item.title);
         const description = currentLang === 'ru' ? (item.descRu || item.description_ru || item.description) : (item.descEn || item.description_en || item.description);
-        
-        // Нишони акс (иконка)
         const iconSrc = item.iconUrl || item.image || (item.media && item.media.icon) || '../assets/default-icon.png';
         
-        // Маълумоти техникӣ
         const version = item.version || '1.0.0';
         const size = item.size || '26.3 MB';
         const developer = item.developer || 'ZEROHUB';
         const updated = item.updated || '2026';
 
-        // Элементҳои саҳифаро пайдо мекунем ва маълумотро мечаспонем
-        const appTitleEl = document.querySelector('.app-title') || document.getElementById('appTitle');
-        const appIconEl = document.querySelector('.app-icon') || document.getElementById('appIcon');
-        const appDevEl = document.querySelector('.app-developer') || document.getElementById('appDeveloper');
-        const appDescEl = document.querySelector('.app-description') || document.getElementById('appDescription');
+        // 🚨 Навсозии элементҳо (ҳам классҳо ва ҳам ID-ҳоро месанҷад)
+        setElementText('.app-title', title);
+        setElementText('#appTitle', title);
         
-        if (appTitleEl) appTitleEl.innerText = title;
-        if (appIconEl) appIconEl.src = iconSrc;
-        if (appDevEl) appDevEl.innerText = developer;
-        if (appDescEl) appDescEl.innerText = description || (currentLang === 'ru' ? 'Описание отсутствует.' : 'No description available.');
+        setElementText('.app-developer', developer);
+        setElementText('#appDeveloper', developer);
+        
+        setElementText('.app-description', description || 'Описание отсутствует.');
+        setElementText('#appDescription', description || 'Описание отсутствует.');
+
+        // Навсозии иконка
+        const iconElements = document.querySelectorAll('.app-icon, #appIcon, .product-icon');
+        iconElements.forEach(el => {
+            if (el) el.src = iconSrc;
+        });
 
         // Навсозии ҷадвали техникӣ (Версия, Размер, Обновлено)
-        const versionEl = document.getElementById('appVersion');
-        const sizeEl = document.getElementById('appSize');
-        const updatedEl = document.getElementById('appUpdated');
+        updateSpecInfo("Версия", version);
+        updateSpecInfo("Размер", size);
+        updateSpecInfo("Обновлено", updated);
 
-        if (versionEl) versionEl.innerText = version;
-        if (sizeEl) sizeEl.innerText = size;
-        if (updatedEl) updatedEl.innerText = updated;
+        // Тугмаи скачат
+        const downloadButtons = document.querySelectorAll('.download-btn, #downloadBtn, .btn-download');
+        downloadButtons.forEach(btn => {
+            if (btn) btn.href = item.downloadUrl || item.downloadURL || '#';
+        });
 
-        // Тугмаи скачат кардан (Download URL)
-        const downloadBtn = document.querySelector('.download-btn') || document.getElementById('downloadBtn');
-        if (downloadBtn) {
-            downloadBtn.href = item.downloadUrl || item.downloadURL || '#';
+        // Агар блоки хатогӣ кушода бошад, онро пинҳон мекунем
+        const errorBlock = document.getElementById('errorBlock') || document.querySelector('.error-container');
+        if (errorBlock) errorBlock.style.display = 'none';
+    });
+}
+
+// Функсияи ёрирасон барои гузоштани матн
+function setElementText(selector, text) {
+    const el = document.querySelector(selector);
+    if (el) el.innerText = text;
+}
+
+// Функсия барои навсозии Размер ва Версия дар ҷадвалҳо
+function updateSpecInfo(label, value) {
+    // Кӯшиш мекунад элементҳоро аз рӯи ID ё матни дохили ҷадвал ёбад
+    if (label === "Версия") setElementText('#appVersion', value);
+    if (label === "Размер") setElementText('#appSize', value);
+    if (label === "Обновлено") setElementText('#appUpdated', value);
+
+    // Пайдо кардан аз рӯи матни тегҳо
+    const specItems = document.querySelectorAll('.spec-item, .info-row, tr');
+    specItems.forEach(item => {
+        if (item.innerText.includes(label)) {
+            const valEl = item.querySelector('.spec-value, .info-value, td:last-child');
+            if (valEl) valEl.innerText = value;
         }
     });
 }
 
-// Функсия дар ҳолати хатогӣ ё набудани маҳсулот
 function showError() {
-    const container = document.querySelector('.page-content') || document.body;
-    // Агар блокҳои тайёри хатогӣ дар HTML бошанд, матни онҳоро иваз мекунем
-    const errorTitle = document.getElementById('errorTitle') || document.querySelector('.error-message');
+    const errorTitle = document.getElementById('errorTitle') || document.querySelector('.error-message') || document.querySelector('h1');
     if (errorTitle) {
         errorTitle.innerText = currentLang === 'ru' ? "Приложение не найдено или удалено." : "Application not found or deleted.";
     }
