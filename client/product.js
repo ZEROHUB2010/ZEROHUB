@@ -43,7 +43,7 @@ function loadProductDetails() {
         const description = currentLang === 'ru' ? (item.descRu || item.description) : (item.descEn || item.description);
         const iconSrc = item.iconUrl || 'https://via.placeholder.com/100';
 
-        // Гузоштани маълумотҳо ба саҳифа
+        // 1. Ном, тавсиф ва иконка
         setElementText('.app-title', title);
         setElementText('#appTitle', title);
         setElementText('.app-developer', item.developer || 'ZEROHUB');
@@ -51,18 +51,33 @@ function loadProductDetails() {
         setElementText('.app-description', description || 'Описание отсутствует.');
         setElementText('#appDescription', description || 'Описание отсутствует.');
 
-        document.querySelectorAll('.app-icon, #appIcon, .product-icon').forEach(el => {
+        document.querySelectorAll('.app-icon, #appIcon, .product-icon, .app-details-header img').forEach(el => {
             if (el) el.src = iconSrc;
         });
 
-        // Навсозии таблитсаи техникӣ
-        updateSpecInfo("Версия", item.version || '1.0.0');
-        updateSpecInfo("Размер", item.size || '26.3 MB');
-        updateSpecInfo("Обновлено", item.updated || '2026');
+        // 2. 🔥 Навсозии қисмҳои техникӣ (Версия, Размер, Обновлено) аз рӯи ID
+        const versionVal = item.version || '1.0.0';
+        const sizeVal = item.size || '26.3 MB';
+        const updatedVal = item.updated || '2026';
 
-        // Линки тугмаи скачат
-        document.querySelectorAll('.download-btn, #downloadBtn, .btn-download').forEach(btn => {
-            if (btn) btn.href = item.downloadUrl || item.downloadURL || '#';
+        setElementText('#appVersion', versionVal);
+        setElementText('#appSize', sizeVal);
+        setElementText('#appUpdated', updatedVal);
+
+        // 3. 🔥 Агар ID кор накунад, матни дохили элементҳоро кофта иваз мекунад
+        updateSpecByText("Версия", versionVal);
+        updateSpecByText("Размер", sizeVal);
+        updateSpecByText("Обновлено", updatedVal);
+
+        // 4. Тугмаи СКАЧАТ
+        document.querySelectorAll('.download-btn, #downloadBtn, .btn-download, a.download-link').forEach(btn => {
+            if (btn) {
+                btn.href = item.downloadUrl || item.downloadURL || '#';
+                // Агар тугма дар дохили худ матни содда дошта бошад
+                if(btn.tagName === 'A' && !btn.innerHTML.includes('fa-')) {
+                    btn.innerText = currentLang === 'ru' ? 'СКАЧАТЬ' : 'DOWNLOAD';
+                }
+            }
         });
 
         const errorBlock = document.getElementById('errorBlock') || document.querySelector('.error-container');
@@ -75,15 +90,20 @@ function setElementText(selector, text) {
     if (el) el.innerText = text;
 }
 
-function updateSpecInfo(label, value) {
-    if (label === "Версия") setElementText('#appVersion', value);
-    if (label === "Размер") setElementText('#appSize', value);
-    if (label === "Обновлено") setElementText('#appUpdated', value);
-
-    document.querySelectorAll('.spec-item, .info-row, tr').forEach(item => {
-        if (item.innerText.includes(label)) {
-            const valEl = item.querySelector('.spec-value, .info-value, td:last-child');
-            if (valEl) valEl.innerText = value;
+// Функсияи махсус барои ёфтани матни "Версия:" ва "Размер:" дар HTML
+function updateSpecByText(labelText, valueText) {
+    // Ҳамаи элементҳои рӯйхат, ҷадвал ё блокҳоро мекобад
+    const allElements = document.querySelectorAll('.spec-item, .info-row, tr, p, div');
+    allElements.forEach(el => {
+        if (el.innerText.includes(labelText)) {
+            // Мекобад, ки оё дар дарунаш барои қимат теги махсус (span/td) ҳаст ё не
+            const valEl = el.querySelector('.spec-value, .info-value, td:last-child, span');
+            if (valEl) {
+                valEl.innerText = valueText;
+            } else {
+                // Агар теги ҷудогона набошад, мустақим матни худи блокро нав мекунад
+                el.innerHTML = `<strong>${labelText}:</strong> ${valueText}`;
+            }
         }
     });
 }
