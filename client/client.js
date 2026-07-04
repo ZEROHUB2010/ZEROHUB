@@ -1,5 +1,22 @@
 // client/client.js - ZEROHUB Client Engine (RU/EN Support)
-import { dbService } from '../firebase.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// Конфиги Firebase-и ту барои пайвастшавии мустақим
+const firebaseConfig = {
+  apiKey: "AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
+  authDomain: "zerohub2010.firebaseapp.com",
+  databaseURL: "https://zerohub2010-default-rtdb.firebaseio.com",
+  projectId: "zerohub2010",
+  storageBucket: "zerohub2010.firebasestorage.app",
+  messagingSenderId: "10761752021",
+  appId: "1:10761752021:web:891c5494e298f2c21e815c",
+  measurementId: "G-7MM70103ZZ"
+};
+
+// Инициализатсияи Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
 // Танзимоти забони пешфарз
 let currentLang = localStorage.getItem('zh_lang') || 'ru';
@@ -35,16 +52,20 @@ const i18n = {
 };
 
 // Инициализатсияи Саҳифа
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     setupLanguageSwitcher();
     applyLanguageStrings();
-    await loadMainPageProducts();
+    loadMainPageProducts(); // Пайвасти доимӣ ба Firebase
 });
 
 // Танзими ивазкунандаи забон
 function setupLanguageSwitcher() {
     const headerContainer = document.querySelector('.user-actions');
     if (!headerContainer) return;
+
+    // Барои он ки тугмаҳо дубора зиёд нашаванд
+    const oldBtn = document.querySelector('.lang-toggle-btn');
+    if (oldBtn) oldBtn.remove();
 
     const langBtn = document.createElement('button');
     langBtn.className = 'lang-toggle-btn';
@@ -67,45 +88,77 @@ function applyLanguageStrings() {
     const searchInput = document.querySelector('.search-box input');
     if (searchInput) searchInput.placeholder = i18n[currentLang].searchPlaceholder;
 
-    document.querySelector('.nav-home').innerText = i18n[currentLang].home;
-    document.querySelector('.nav-apps').innerText = i18n[currentLang].apps;
-    document.querySelector('.nav-games').innerText = i18n[currentLang].games;
-    document.getElementById('linkTerms').innerText = i18n[currentLang].terms;
-    document.getElementById('linkPrivacy').innerText = i18n[currentLang].privacy;
+    const navHome = document.querySelector('.nav-home');
+    const navApps = document.querySelector('.nav-apps');
+    const navGames = document.querySelector('.nav-games');
+    const linkTerms = document.getElementById('linkTerms');
+    const linkPrivacy = document.getElementById('linkPrivacy');
 
-    document.getElementById('titleFeatured').innerHTML = `${i18n[currentLang].featured} <a href="products.html?filter=featured">${i18n[currentLang].viewAll} <i class="fa-solid fa-arrow-right"></i></a>`;
-    document.getElementById('titleNew').innerHTML = `${i18n[currentLang].newReleases} <a href="products.html?filter=new">${i18n[currentLang].viewAll} <i class="fa-solid fa-arrow-right"></i></a>`;
-    document.getElementById('titlePopular').innerHTML = `${i18n[currentLang].popular} <a href="products.html?filter=popular">${i18n[currentLang].viewAll} <i class="fa-solid fa-arrow-right"></i></a>`;
+    if (navHome) navHome.innerText = i18n[currentLang].home;
+    if (navApps) navApps.innerText = i18n[currentLang].apps;
+    if (navGames) navGames.innerText = i18n[currentLang].games;
+    if (linkTerms) linkTerms.innerText = i18n[currentLang].terms;
+    if (linkPrivacy) linkPrivacy.innerText = i18n[currentLang].privacy;
+
+    const tFeatured = document.getElementById('titleFeatured');
+    const tNew = document.getElementById('titleNew');
+    const tPopular = document.getElementById('titlePopular');
+
+    if (tFeatured) tFeatured.innerHTML = `${i18n[currentLang].featured} <a href="products.html?filter=featured">${i18n[currentLang].viewAll} <i class="fa-solid fa-arrow-right"></i></a>`;
+    if (tNew) tNew.innerHTML = `${i18n[currentLang].newReleases} <a href="products.html?filter=new">${i18n[currentLang].viewAll} <i class="fa-solid fa-arrow-right"></i></a>`;
+    if (tPopular) tPopular.innerHTML = `${i18n[currentLang].popular} <a href="products.html?filter=popular">${i18n[currentLang].viewAll} <i class="fa-solid fa-arrow-right"></i></a>`;
 }
 
-// Боркунии маҳсулот аз Firebase
-async function loadMainPageProducts() {
+// Боркунии маҳсулот аз Firebase дар вақти ҳақиқӣ (Realtime)
+function loadMainPageProducts() {
     const featuredGrid = document.getElementById('featuredAppsGrid');
     const newGrid = document.getElementById('newAppsGrid');
     const popularGrid = document.getElementById('popularAppsGrid');
 
     if (!featuredGrid || !newGrid || !popularGrid) return;
 
-    featuredGrid.innerHTML = '';
-    newGrid.innerHTML = '';
-    popularGrid.innerHTML = '';
+    const gamesRef = ref(database, 'games');
 
-    try {
-        const products = await dbService.getAllProducts();
+    onValue(gamesRef, (snapshot) => {
+        const data = snapshot.val();
         
-        const featuredProducts = products.filter(p => p.isFeatured).slice(0, 4);
-        const newProducts = [...products].sort((a, b) => b.createdAt - a.createdAt).slice(0, 4);
-        const popularProducts = [...products].sort((a, b) => b.stats.downloads - a.stats.downloads).slice(0, 4);
+        featuredGrid.innerHTML = '';
+        newGrid.innerHTML = '';
+        popularGrid.innerHTML = '';
 
+        if (!data) {
+            featuredGrid.innerHTML = `<div style="color:var(--text-muted); padding:20px;">${i18n[currentLang].noApps}</div>`;
+            newGrid.innerHTML = `<div style="color:var(--text-muted); padding:20px;">${i18n[currentLang].noApps}</div>`;
+            popularGrid.innerHTML = `<div style="color:var(--text-muted); padding:20px;">${i18n[currentLang].noApps}</div>`;
+            return;
+        }
+
+        // Табдил додани объект ба массив барои сорт ва филтр кардан
+        const productsList = Object.keys(data).map(key => {
+            return { id: key, ...data[key] };
+        });
+
+        // 1. Рекомендуемые (онҳое, ки ишора доранд)
+        const featuredProducts = productsList.filter(p => p.isFeatured || p.featured).slice(0, 4);
+        
+        // 2. Новинки (аз рӯи вақти сохтмон ё тартиби баръакс)
+        const newProducts = [...productsList].reverse().slice(0, 4);
+        
+        // 3. Популярные (аз рӯи зеркашиҳо, агар набошад оддӣ филтр мешавад)
+        const popularProducts = [...productsList].sort((a, b) => {
+            const downloadsA = (a.stats && a.stats.downloads) ? a.stats.downloads : (a.downloads || 0);
+            const downloadsB = (b.stats && b.stats.downloads) ? b.stats.downloads : (b.downloads || 0);
+            return downloadsB - downloadsA;
+        }).slice(0, 4);
+
+        // Рендер кардани ҳар як сетка (Grid)
         renderGrid(featuredProducts, featuredGrid);
         renderGrid(newProducts, newGrid);
         renderGrid(popularProducts, popularGrid);
-    } catch (error) {
-        console.error("Хатогии боркунӣ:", error);
-    }
+    });
 }
 
-// Рендери Картаҳои Маҳсулот
+// Рендери Картаҳои Маҳсулот (Дақиқ мувофиқи тарҳи касбии ту)
 function renderGrid(items, targetGrid) {
     if (items.length === 0) {
         targetGrid.innerHTML = `<div style="color:var(--text-muted); padding:20px;">${i18n[currentLang].noApps}</div>`;
@@ -113,20 +166,32 @@ function renderGrid(items, targetGrid) {
     }
 
     items.forEach(item => {
+        // Интихоби номи маҳсулот вобаста ба забони кунунӣ
         const title = currentLang === 'ru' ? (item.title_ru || item.title) : (item.title_en || item.title);
-        
+        // Интихоби акс ё нишони пешфарз
+        const iconSrc = item.image || (item.media && item.media.icon) || '../assets/default-icon.png';
+        const version = item.version || '1.0.0';
+
         const card = document.createElement('div');
         card.className = 'app-card';
         card.innerHTML = `
-            <img src="${item.media.icon || '../assets/default-icon.png'}" alt="${title}" class="app-icon">
-            <div class="app-name">${title}</div>
-            <div class="app-meta">
-                <span>${item.version}</span>
-                <span style="color:var(--primary)">${item.id}</span>
+            <div class="app-icon-wrapper">
+                <img src="${iconSrc}" alt="${title}" class="app-icon">
             </div>
+            <div class="app-details">
+                <h3 class="app-title">${title}</h3>
+                <p class="app-developer">${item.developer || 'ZEROHUB'}</p>
+                <div class="app-meta">
+                    <span class="app-rating"><i class="fa-solid fa-star"></i> 4.8</span>
+                    <span class="app-size">${item.size || version}</span>
+                </div>
+            </div>
+            <a href="#" class="download-btn-grid" title="Скачать"><i class="fa-solid fa-arrow-down"></i></a>
         `;
         
-        card.addEventListener('click', () => {
+        // Гузариш ба саҳифаи бозӣ ҳангоми пахши карточка
+        card.addEventListener('click', (e) => {
+            e.preventDefault();
             window.location.href = `product.html?id=${item.id}`;
         });
         
