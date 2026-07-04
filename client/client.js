@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Конфиги Firebase-и ту барои пайвастшавии мустақим
+// Конфиги Firebase-и ту
 const firebaseConfig = {
   apiKey: "AIzaSyA_qDc-FbKjLGUF0YTJBQMiLE8sbw8mpGI",
   authDomain: "zerohub2010.firebaseapp.com",
@@ -14,14 +14,12 @@ const firebaseConfig = {
   measurementId: "G-7MM70103ZZ"
 };
 
-// Инициализатсияи Firebase
+// Инициализатсия
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// Танзимоти забони пешфарз
 let currentLang = localStorage.getItem('zh_lang') || 'ru';
 
-// Луғати тарҷумаҳо барои Сайти Мардум
 const i18n = {
     ru: {
         searchPlaceholder: "Поиск приложений и игр...",
@@ -51,19 +49,16 @@ const i18n = {
     }
 };
 
-// Инициализатсияи Саҳифа
 document.addEventListener('DOMContentLoaded', () => {
     setupLanguageSwitcher();
     applyLanguageStrings();
-    loadMainPageProducts(); // Пайвасти доимӣ ба Firebase
+    loadMainPageProducts();
 });
 
-// Танзими ивазкунандаи забон
 function setupLanguageSwitcher() {
     const headerContainer = document.querySelector('.user-actions');
     if (!headerContainer) return;
 
-    // Барои он ки тугмаҳо дубора зиёд нашаванд
     const oldBtn = document.querySelector('.lang-toggle-btn');
     if (oldBtn) oldBtn.remove();
 
@@ -83,7 +78,6 @@ function setupLanguageSwitcher() {
     headerContainer.insertBefore(langBtn, headerContainer.firstChild);
 }
 
-// Тарҷумаи элементҳои статикии сайт
 function applyLanguageStrings() {
     const searchInput = document.querySelector('.search-box input');
     if (searchInput) searchInput.placeholder = i18n[currentLang].searchPlaceholder;
@@ -109,7 +103,6 @@ function applyLanguageStrings() {
     if (tPopular) tPopular.innerHTML = `${i18n[currentLang].popular} <a href="products.html?filter=popular">${i18n[currentLang].viewAll} <i class="fa-solid fa-arrow-right"></i></a>`;
 }
 
-// Боркунии маҳсулот аз Firebase дар вақти ҳақиқӣ (Realtime)
 function loadMainPageProducts() {
     const featuredGrid = document.getElementById('featuredAppsGrid');
     const newGrid = document.getElementById('newAppsGrid');
@@ -117,9 +110,10 @@ function loadMainPageProducts() {
 
     if (!featuredGrid || !newGrid || !popularGrid) return;
 
-    const gamesRef = ref(database, 'games');
+    // 🔥 АНА ИН ҶО! Акнун мустақим аз папкаи 'products' мехонем:
+    const productsRef = ref(database, 'products');
 
-    onValue(gamesRef, (snapshot) => {
+    onValue(productsRef, (snapshot) => {
         const data = snapshot.val();
         
         featuredGrid.innerHTML = '';
@@ -133,32 +127,25 @@ function loadMainPageProducts() {
             return;
         }
 
-        // Табдил додани объект ба массив барои сорт ва филтр кардан
         const productsList = Object.keys(data).map(key => {
             return { id: key, ...data[key] };
         });
 
-        // 1. Рекомендуемые (онҳое, ки ишора доранд)
+        // Филтр ва сорт кардани барномаҳо/бозиҳо аз папкаи products
         const featuredProducts = productsList.filter(p => p.isFeatured || p.featured).slice(0, 4);
-        
-        // 2. Новинки (аз рӯи вақти сохтмон ё тартиби баръакс)
         const newProducts = [...productsList].reverse().slice(0, 4);
-        
-        // 3. Популярные (аз рӯи зеркашиҳо, агар набошад оддӣ филтр мешавад)
         const popularProducts = [...productsList].sort((a, b) => {
-            const downloadsA = (a.stats && a.stats.downloads) ? a.stats.downloads : (a.downloads || 0);
-            const downloadsB = (b.stats && b.stats.downloads) ? b.stats.downloads : (b.downloads || 0);
+            const downloadsA = a.downloads || (a.stats && a.stats.downloads) || 0;
+            const downloadsB = b.downloads || (b.stats && b.stats.downloads) || 0;
             return downloadsB - downloadsA;
         }).slice(0, 4);
 
-        // Рендер кардани ҳар як сетка (Grid)
         renderGrid(featuredProducts, featuredGrid);
         renderGrid(newProducts, newGrid);
         renderGrid(popularProducts, popularGrid);
     });
 }
 
-// Рендери Картаҳои Маҳсулот (Дақиқ мувофиқи тарҳи касбии ту)
 function renderGrid(items, targetGrid) {
     if (items.length === 0) {
         targetGrid.innerHTML = `<div style="color:var(--text-muted); padding:20px;">${i18n[currentLang].noApps}</div>`;
@@ -166,10 +153,9 @@ function renderGrid(items, targetGrid) {
     }
 
     items.forEach(item => {
-        // Интихоби номи маҳсулот вобаста ба забони кунунӣ
         const title = currentLang === 'ru' ? (item.title_ru || item.title) : (item.title_en || item.title);
-        // Интихоби акс ё нишони пешфарз
-        const iconSrc = item.image || (item.media && item.media.icon) || '../assets/default-icon.png';
+        // Агар линки акс дар база дар калиди 'image' ё 'media.icon' бошад, онро мехонад
+        const iconSrc = item.image || (item.media && item.media.icon) || 'https://via.placeholder.com/100';
         const version = item.version || '1.0.0';
 
         const card = document.createElement('div');
@@ -189,7 +175,6 @@ function renderGrid(items, targetGrid) {
             <a href="#" class="download-btn-grid" title="Скачать"><i class="fa-solid fa-arrow-down"></i></a>
         `;
         
-        // Гузариш ба саҳифаи бозӣ ҳангоми пахши карточка
         card.addEventListener('click', (e) => {
             e.preventDefault();
             window.location.href = `product.html?id=${item.id}`;
