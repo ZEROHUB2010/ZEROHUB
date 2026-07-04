@@ -14,7 +14,7 @@ const firebaseConfig = {
   measurementId: "G-7MM70103ZZ"
 };
 
-// Инициализатсия
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
@@ -110,7 +110,6 @@ function loadMainPageProducts() {
 
     if (!featuredGrid || !newGrid || !popularGrid) return;
 
-    // Хондан аз папкаи products
     const productsRef = ref(database, 'products');
 
     onValue(productsRef, (snapshot) => {
@@ -131,12 +130,11 @@ function loadMainPageProducts() {
             return { id: key, ...data[key] };
         });
 
-        // Сорт ва филтр кардани маҳсулот
         const featuredProducts = productsList.filter(p => p.isFeatured || p.featured).slice(0, 4);
         const newProducts = [...productsList].reverse().slice(0, 4);
         const popularProducts = [...productsList].sort((a, b) => {
-            const downloadsA = a.downloads || 0;
-            const downloadsB = b.downloads || 0;
+            const downloadsA = a.downloads || (a.stats && a.stats.downloads) || 0;
+            const downloadsB = b.downloads || (b.stats && b.stats.downloads) || 0;
             return downloadsB - downloadsA;
         }).slice(0, 4);
 
@@ -153,11 +151,20 @@ function renderGrid(items, targetGrid) {
     }
 
     items.forEach(item => {
-        // 🔥 ИСЛОҲИ АСОСӢ: Хондани номҳо дақиқ аз рӯи сохтори админкаи ту (titleRu / titleEn)
-        const title = currentLang === 'ru' ? (item.titleRu || item.title) : (item.titleEn || item.title);
-        // Хондани линки акс аз iconUrl
-        const iconSrc = item.iconUrl || 'https://via.placeholder.com/100';
+        // 🔥 Санҷиши ҳамаҷонибаи номи барнома (агар кадомеаш дар база бошад, ҳамонро мегирад)
+        let title = '';
+        if (currentLang === 'ru') {
+            title = item.titleRu || item.title_ru || item.title || 'Без названия';
+        } else {
+            title = item.titleEn || item.title_en || item.title || 'Untitled';
+        }
+
+        // 🔥 Санҷиши линки акс (ҳам iconUrl, ҳам image ва ҳам media.icon-ро месанҷад)
+        const iconSrc = item.iconUrl || item.image || (item.media && item.media.icon) || 'https://via.placeholder.com/100';
+        
+        // Санҷиши ҳаҷм ва версия
         const version = item.version || '1.0.0';
+        const size = item.size || '26.3 MB';
 
         const card = document.createElement('div');
         card.className = 'app-card';
@@ -170,7 +177,7 @@ function renderGrid(items, targetGrid) {
                 <p class="app-developer">${item.developer || 'ZEROHUB'}</p>
                 <div class="app-meta">
                     <span class="app-rating"><i class="fa-solid fa-star"></i> 4.8</span>
-                    <span class="app-size">${item.size || version}</span>
+                    <span class="app-size">${size}</span>
                 </div>
             </div>
             <a href="#" class="download-btn-grid" title="Скачать"><i class="fa-solid fa-arrow-down"></i></a>
