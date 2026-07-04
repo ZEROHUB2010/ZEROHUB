@@ -55,28 +55,18 @@ function loadProductDetails() {
             if (el) el.src = iconSrc;
         });
 
-        // 2. 🔥 Навсозии қисмҳои техникӣ (Версия, Размер, Обновлено) аз рӯи ID
+        // 2. Маълумоти техникӣ аз Firebase
         const versionVal = item.version || '1.0.0';
         const sizeVal = item.size || '26.3 MB';
         const updatedVal = item.updated || '2026';
 
-        setElementText('#appVersion', versionVal);
-        setElementText('#appSize', sizeVal);
-        setElementText('#appUpdated', updatedVal);
-
-        // 3. 🔥 Агар ID кор накунад, матни дохили элементҳоро кофта иваз мекунад
-        updateSpecByText("Версия", versionVal);
-        updateSpecByText("Размер", sizeVal);
-        updateSpecByText("Обновлено", updatedVal);
+        // 3. 🔥 Ислоҳи асосӣ: Кофтани матнҳо ва иваз кардани маҳз ҳамон қисми тире (-)
+        updateTechnicalInfo(versionVal, sizeVal, updatedVal);
 
         // 4. Тугмаи СКАЧАТ
         document.querySelectorAll('.download-btn, #downloadBtn, .btn-download, a.download-link').forEach(btn => {
             if (btn) {
                 btn.href = item.downloadUrl || item.downloadURL || '#';
-                // Агар тугма дар дохили худ матни содда дошта бошад
-                if(btn.tagName === 'A' && !btn.innerHTML.includes('fa-')) {
-                    btn.innerText = currentLang === 'ru' ? 'СКАЧАТЬ' : 'DOWNLOAD';
-                }
             }
         });
 
@@ -90,22 +80,30 @@ function setElementText(selector, text) {
     if (el) el.innerText = text;
 }
 
-// Функсияи махсус барои ёфтани матни "Версия:" ва "Размер:" дар HTML
-function updateSpecByText(labelText, valueText) {
-    // Ҳамаи элементҳои рӯйхат, ҷадвал ё блокҳоро мекобад
-    const allElements = document.querySelectorAll('.spec-item, .info-row, tr, p, div');
-    allElements.forEach(el => {
-        if (el.innerText.includes(labelText)) {
-            // Мекобад, ки оё дар дарунаш барои қимат теги махсус (span/td) ҳаст ё не
-            const valEl = el.querySelector('.spec-value, .info-value, td:last-child, span');
-            if (valEl) {
-                valEl.innerText = valueText;
-            } else {
-                // Агар теги ҷудогона набошад, мустақим матни худи блокро нав мекунад
-                el.innerHTML = `<strong>${labelText}:</strong> ${valueText}`;
+// 🔥 Функсияи нав барои 100% ёфтани Версия ва Размер дар саҳифа
+function updateTechnicalInfo(version, size, updated) {
+    // Ҳамаи элементҳои саҳифаро мекобад, ки дар дохилашон калимаҳои техникӣ ҳаст
+    const elements = document.querySelectorAll('div, p, span, td, li');
+    
+    elements.forEach(el => {
+        // Агар элемент теги дарунӣ надошта бошад ва танҳо матн бошад
+        if (el.children.length === 0 || el.children.length === 1) {
+            if (el.innerText.includes('Версия:')) {
+                el.innerHTML = `Версия: <span style="color:var(--text-main, #fff); font-weight:bold;">${version}</span>`;
+            }
+            if (el.innerText.includes('Размер:')) {
+                el.innerHTML = `Размер: <span style="color:var(--text-main, #fff); font-weight:bold;">${size}</span>`;
+            }
+            if (el.innerText.includes('Обновлено:')) {
+                el.innerHTML = `Обновлено: <span style="color:var(--text-main, #fff); font-weight:bold;">${updated}</span>`;
             }
         }
     });
+
+    // Иловатан аз рӯи ID-ҳо ҳам месанҷад (агар бошанд)
+    setElementText('#appVersion', version);
+    setElementText('#appSize', size);
+    setElementText('#appUpdated', updated);
 }
 
 function showError() {
