@@ -110,7 +110,7 @@ function loadMainPageProducts() {
 
     if (!featuredGrid || !newGrid || !popularGrid) return;
 
-    // 🔥 АНА ИН ҶО! Акнун мустақим аз папкаи 'products' мехонем:
+    // Хондан аз папкаи products
     const productsRef = ref(database, 'products');
 
     onValue(productsRef, (snapshot) => {
@@ -131,12 +131,12 @@ function loadMainPageProducts() {
             return { id: key, ...data[key] };
         });
 
-        // Филтр ва сорт кардани барномаҳо/бозиҳо аз папкаи products
+        // Сорт ва филтр кардани маҳсулот
         const featuredProducts = productsList.filter(p => p.isFeatured || p.featured).slice(0, 4);
         const newProducts = [...productsList].reverse().slice(0, 4);
         const popularProducts = [...productsList].sort((a, b) => {
-            const downloadsA = a.downloads || (a.stats && a.stats.downloads) || 0;
-            const downloadsB = b.downloads || (b.stats && b.stats.downloads) || 0;
+            const downloadsA = a.downloads || 0;
+            const downloadsB = b.downloads || 0;
             return downloadsB - downloadsA;
         }).slice(0, 4);
 
@@ -153,9 +153,10 @@ function renderGrid(items, targetGrid) {
     }
 
     items.forEach(item => {
-        const title = currentLang === 'ru' ? (item.title_ru || item.title) : (item.title_en || item.title);
-        // Агар линки акс дар база дар калиди 'image' ё 'media.icon' бошад, онро мехонад
-        const iconSrc = item.image || (item.media && item.media.icon) || 'https://via.placeholder.com/100';
+        // 🔥 ИСЛОҲИ АСОСӢ: Хондани номҳо дақиқ аз рӯи сохтори админкаи ту (titleRu / titleEn)
+        const title = currentLang === 'ru' ? (item.titleRu || item.title) : (item.titleEn || item.title);
+        // Хондани линки акс аз iconUrl
+        const iconSrc = item.iconUrl || 'https://via.placeholder.com/100';
         const version = item.version || '1.0.0';
 
         const card = document.createElement('div');
