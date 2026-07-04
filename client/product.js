@@ -39,11 +39,12 @@ function loadProductDetails() {
             return;
         }
 
+        // Аниқ кардани ном ва тавсиф аз рӯи калидҳои дақиқи дашборд (titleRu, descRu)
         const title = currentLang === 'ru' ? (item.titleRu || item.title) : (item.titleEn || item.title);
         const description = currentLang === 'ru' ? (item.descRu || item.description) : (item.descEn || item.description);
         const iconSrc = item.iconUrl || 'https://via.placeholder.com/100';
 
-        // 1. Ном, тавсиф ва иконка
+        // 1. Гузоштани маълумотҳои асосӣ
         setElementText('.app-title', title);
         setElementText('#appTitle', title);
         setElementText('.app-developer', item.developer || 'ZEROHUB');
@@ -55,18 +56,27 @@ function loadProductDetails() {
             if (el) el.src = iconSrc;
         });
 
-        // 2. Маълумоти техникӣ аз Firebase
+        // 2. 🔥 Калидҳои ҳақиқӣ аз коди dashboard.js-и ту
         const versionVal = item.version || '1.0.0';
         const sizeVal = item.size || '26.3 MB';
-        const updatedVal = item.updated || '2026';
+        
+        // Коркарди санаи пайдоиш (Масалан: 2026-07-04)
+        let updatedVal = '2026';
+        if (item.date) {
+            try {
+                updatedVal = item.date.split('T')[0]; // Танҳо рӯз, моҳ ва солро мегирад
+            } catch(e) {
+                updatedVal = item.date;
+            }
+        }
 
-        // 3. 🔥 Ислоҳи асосӣ: Кофтани матнҳо ва иваз кардани маҳз ҳамон қисми тире (-)
+        // 3. Навсозии қисмҳои техникӣ дар экран
         updateTechnicalInfo(versionVal, sizeVal, updatedVal);
 
-        // 4. Тугмаи СКАЧАТ
+        // 4. Линки тугмаи СКАЧАТ (Маҳз аз рӯи калиди prodDownloadUrl -> downloadUrl)
         document.querySelectorAll('.download-btn, #downloadBtn, .btn-download, a.download-link').forEach(btn => {
             if (btn) {
-                btn.href = item.downloadUrl || item.downloadURL || '#';
+                btn.href = item.downloadUrl || '#';
             }
         });
 
@@ -80,30 +90,30 @@ function setElementText(selector, text) {
     if (el) el.innerText = text;
 }
 
-// 🔥 Функсияи нав барои 100% ёфтани Версия ва Размер дар саҳифа
+// Функсияи пурқувватшуда барои ҷойгузин кардани Версия ва Размер
 function updateTechnicalInfo(version, size, updated) {
-    // Ҳамаи элементҳои саҳифаро мекобад, ки дар дохилашон калимаҳои техникӣ ҳаст
-    const elements = document.querySelectorAll('div, p, span, td, li');
-    
-    elements.forEach(el => {
-        // Агар элемент теги дарунӣ надошта бошад ва танҳо матн бошад
-        if (el.children.length === 0 || el.children.length === 1) {
-            if (el.innerText.includes('Версия:')) {
-                el.innerHTML = `Версия: <span style="color:var(--text-main, #fff); font-weight:bold;">${version}</span>`;
-            }
-            if (el.innerText.includes('Размер:')) {
-                el.innerHTML = `Размер: <span style="color:var(--text-main, #fff); font-weight:bold;">${size}</span>`;
-            }
-            if (el.innerText.includes('Обновлено:')) {
-                el.innerHTML = `Обновлено: <span style="color:var(--text-main, #fff); font-weight:bold;">${updated}</span>`;
-            }
-        }
-    });
-
-    // Иловатан аз рӯи ID-ҳо ҳам месанҷад (агар бошанд)
+    // 1-ум вариант: Агар дар саҳифа тегҳо бо ID-и махсус бошанд
     setElementText('#appVersion', version);
     setElementText('#appSize', size);
     setElementText('#appUpdated', updated);
+
+    // 2-юм вариант: Ҷустуҷӯи матнҳои дохили блокҳо ва иваз кардани тиреҳо
+    const allBlocks = document.querySelectorAll('div, p, span, td, li');
+    allBlocks.forEach(el => {
+        // Танҳо он блокҳоеро мекобад, ки калимаҳои лозимиро доранд
+        if (el.children.length === 0 || el.children.length === 1) {
+            const rawText = el.innerText;
+            if (rawText.includes('Версия:')) {
+                el.innerHTML = `Версия: <span style="font-weight:600; color:#fff;">${version}</span>`;
+            }
+            if (rawText.includes('Размер:')) {
+                el.innerHTML = `Размер: <span style="font-weight:600; color:#fff;">${size}</span>`;
+            }
+            if (rawText.includes('Обновлено:')) {
+                el.innerHTML = `Обновлено: <span style="font-weight:600; color:#fff;">${updated}</span>`;
+            }
+        }
+    });
 }
 
 function showError() {
