@@ -151,8 +151,8 @@
         .nav-item i { font-size: 20px; transition: 0.3s; }
         .nav-item.active { color: var(--neon-green); }
 
-        /* App Detail Modal Styles */
-        .modal-overlay {
+        /* App Details Modal */
+        .app-details-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -160,186 +160,223 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.7);
-            z-index: 200;
+            z-index: 1000;
             overflow-y: auto;
-            padding-bottom: 70px;
+            animation: slideUp 0.3s ease-out;
         }
 
-        .modal-overlay.active {
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .app-details-modal.active {
             display: block;
         }
 
         .modal-content {
             background: var(--bg-color);
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border-radius: 0;
-            position: relative;
+            border-radius: 20px 20px 0 0;
+            margin-top: auto;
+            padding: 0;
+            max-width: 100%;
+            animation: modalSlideUp 0.3s ease-out;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
         }
 
         .modal-close-btn {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: transparent;
+            background: rgba(0, 0, 0, 0.5);
             border: none;
-            color: var(--text-main);
-            font-size: 24px;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
             cursor: pointer;
-            z-index: 201;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .modal-app-icon {
-            width: 120px;
-            height: 120px;
+        .media-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 250px;
+            background: var(--card-bg);
+            border-radius: 0;
+        }
+
+        .screenshots-carousel {
+            position: relative;
+            width: 100%;
+            padding-top: 20px;
+            padding-bottom: 10px;
+        }
+
+        .screenshots-scroll {
+            display: flex;
+            overflow-x: auto;
+            padding: 0 15px;
+            gap: 10px;
+            scroll-behavior: smooth;
+        }
+        .screenshots-scroll::-webkit-scrollbar { display: none; }
+
+        .screenshot {
+            min-width: 100px;
+            max-width: 100px;
+            height: 180px;
+            border-radius: 10px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .screenshot:active { transform: scale(0.95); }
+
+        .app-info {
+            padding: 20px;
+        }
+
+        .app-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .app-icon-large {
+            width: 80px;
+            height: 80px;
             border-radius: 20px;
             object-fit: cover;
-            margin: 0 auto 15px;
-            display: block;
         }
 
-        .modal-app-info {
-            text-align: center;
-            margin-bottom: 20px;
+        .app-info-text {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .modal-app-title {
-            font-size: 24px;
+        .app-name {
+            font-size: 18px;
             font-weight: bold;
             margin-bottom: 5px;
         }
 
-        .modal-app-developer {
-            font-size: 16px;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-
-        .modal-app-tags {
+        .app-developer {
             font-size: 13px;
             color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .app-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .download-btn {
+            background: var(--neon-green);
+            color: var(--bg-color);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: 0.2s;
+        }
+        .download-btn:active { opacity: 0.8; }
+
+        .description-section {
             margin-bottom: 15px;
         }
 
-        .modal-app-stats {
-            display: flex;
-            justify-content: space-around;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .stat-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--neon-green);
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .modal-trailer {
-            width: 100%;
-            height: 200px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            background: var(--card-bg);
-            object-fit: cover;
-        }
-
-        .screenshots-container {
-            display: flex;
-            overflow-x: auto;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-        }
-        .screenshots-container::-webkit-scrollbar { height: 4px; }
-        .screenshots-container::-webkit-scrollbar-track { background: var(--card-bg); border-radius: 10px; }
-        .screenshots-container::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 10px; }
-
-        .screenshot {
-            min-width: 120px;
-            height: 180px;
-            border-radius: 10px;
-            object-fit: cover;
-        }
-
-        .description-section {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
         .description-title {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        .description-title i {
-            transition: 0.3s;
-        }
-
-        .description-title.expanded i {
-            transform: rotate(90deg);
         }
 
         .description-text {
             font-size: 13px;
             color: var(--text-muted);
             line-height: 1.5;
-            max-height: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
             overflow: hidden;
-            transition: max-height 0.3s;
+            margin-bottom: 8px;
         }
 
         .description-text.expanded {
-            max-height: 500px;
+            -webkit-line-clamp: unset;
+            white-space: normal;
         }
 
-        .description-preview {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.5;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .modal-download-btn {
-            background: rgba(0, 255, 102, 0.1);
-            color: var(--neon-green);
+        .expand-btn {
+            background: transparent;
             border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
+            color: var(--neon-green);
+            font-size: 12px;
             font-weight: bold;
-            width: 100%;
-            font-size: 16px;
             cursor: pointer;
-            transition: 0.2s;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .modal-download-btn:active {
-            background: var(--neon-green);
-            color: var(--bg-color);
+        .expand-btn i {
+            transition: 0.3s;
+        }
+
+        .expand-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
         }
     </style>
 </head>
@@ -363,50 +400,48 @@
         <div class="empty-message">Загрузка данных... ⏳</div>
     </div>
 
-    <!-- App Detail Modal -->
-    <div id="appModal" class="modal-overlay">
+    <!-- App Details Modal -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="app-details-modal" id="appDetailsModal">
+        <button class="modal-close-btn" onclick="closeAppDetails()">
+            <i class="fas fa-times"></i>
+        </button>
         <div class="modal-content">
-            <button class="modal-close-btn" onclick="closeAppModal()">✕</button>
-            
-            <img id="modalIcon" class="modal-app-icon" src="" alt="">
-            
-            <div class="modal-app-info">
-                <div class="modal-app-title" id="modalTitle"></div>
-                <div class="modal-app-developer" id="modalDeveloper"></div>
-                <div class="modal-app-tags" id="modalTags"></div>
-            </div>
-
-            <div class="modal-app-stats">
-                <div class="stat-item">
-                    <div class="stat-value" id="modalRating">—</div>
-                    <div class="stat-label" id="modalReviews">—</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="modalAge">—</div>
-                    <div class="stat-label" id="modalAgeLabel">Age</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="modalSize">—</div>
-                    <div class="stat-label" id="modalSizeLabel">Size</div>
+            <div class="media-container">
+                <video id="trailerVideo" class="video-player" controls>
+                    <source src="" type="video/mp4">
+                </video>
+                <div class="screenshots-carousel">
+                    <div class="screenshots-scroll" id="screenshotsScroll"></div>
                 </div>
             </div>
 
-            <video id="modalTrailer" class="modal-trailer" controls></video>
-
-            <div class="screenshots-container" id="screenshotsContainer"></div>
-
-            <div class="description-section">
-                <div class="description-title" onclick="toggleDescription(event)">
-                    <span id="descriptionTitleText">Description</span>
-                    <i class="fas fa-chevron-right"></i>
+            <div class="app-info">
+                <div class="app-header">
+                    <img id="modalAppIcon" src="" class="app-icon-large" onerror="this.src='https://placehold.co/100'">
+                    <div class="app-info-text">
+                        <div class="app-name" id="modalAppName">App Name</div>
+                        <div class="app-developer" id="modalAppDeveloper">Developer</div>
+                        <div class="app-meta">
+                            <span id="modalAppSize">—</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="description-preview" id="descriptionPreview"></div>
-                <div class="description-text" id="descriptionFull"></div>
-            </div>
 
-            <button class="modal-download-btn" id="modalDownloadBtn" onclick="downloadApp()">
-                <i class="fas fa-download"></i> <span id="downloadBtnText">Download</span>
-            </button>
+                <button class="download-btn" id="modalDownloadBtn">
+                    <i class="fas fa-download"></i> Скачать
+                </button>
+
+                <div class="description-section">
+                    <div class="description-title">
+                        <span id="descTitle">Описание</span>
+                        <button class="expand-btn" id="expandBtn" onclick="toggleDescription()">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="description-text" id="modalDescription">Description text</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -451,7 +486,7 @@
         let allApps = [];
         let currentCategory = 'game';
         let currentLang = 'ru';
-        let selectedApp = null;
+        let currentApp = null;
 
         function loadData() {
             db.ref('apps').on('value', (snapshot) => {
@@ -494,7 +529,7 @@
                 return;
             }
             container.innerHTML = appsToRender.map(app => `
-                <div class="app-card" onclick="openAppModal(this)">
+                <div class="app-card" onclick="openAppDetails(${JSON.stringify(app).replace(/"/g, '&quot;')})">
                     <img src="${app.iconUrl || 'https://placehold.co/100'}" class="app-icon" onerror="this.src='https://placehold.co/100'">
                     <div class="app-title">${currentLang === 'ru' ? (app.nameRu || 'Без названия') : (app.nameEn || 'No Title')}</div>
                     <div class="app-size">${app.size || '—'}</div>
@@ -514,112 +549,76 @@
             renderApps(filtered);
         }
 
-        function openAppModal(element) {
-            const appCard = element.closest('.app-card');
-            const appIndex = Array.from(document.querySelectorAll('.app-card')).indexOf(appCard);
-            const container = document.getElementById('apps-container');
-            const cards = container.querySelectorAll('.app-card');
-            let appData = null;
+        function openAppDetails(app) {
+            currentApp = app;
+            const modal = document.getElementById('appDetailsModal');
+            const overlay = document.getElementById('modalOverlay');
 
-            for (let app of allApps) {
-                const appName = currentLang === 'ru' ? app.nameRu : app.nameEn;
-                if (appCard.querySelector('.app-title').innerText === appName) {
-                    appData = app;
-                    break;
-                }
+            // Set app info
+            document.getElementById('modalAppName').innerText = currentLang === 'ru' ? (app.nameRu || 'Без названия') : (app.nameEn || 'No Title');
+            document.getElementById('modalAppDeveloper').innerText = app.developer || 'Unknown Developer';
+            document.getElementById('modalAppIcon').src = app.iconUrl || 'https://placehold.co/100';
+            document.getElementById('modalAppSize').innerText = app.size || '—';
+            document.getElementById('modalDescription').innerText = currentLang === 'ru' ? (app.descriptionRu || '') : (app.descriptionEn || '');
+            document.getElementById('descTitle').innerText = currentLang === 'ru' ? 'Описание' : 'Description';
+            document.getElementById('expandBtn').innerText = currentLang === 'ru' ? '▼' : '▼';
+
+            // Set trailer video
+            const trailerVideo = document.getElementById('trailerVideo');
+            trailerVideo.src = app.trailerUrl || '';
+
+            // Set screenshots
+            const screenshotsContainer = document.getElementById('screenshotsScroll');
+            screenshotsContainer.innerHTML = '';
+            if (app.screenshots && Array.isArray(app.screenshots)) {
+                app.screenshots.forEach(screenshot => {
+                    const img = document.createElement('img');
+                    img.src = screenshot;
+                    img.class = 'screenshot';
+                    img.onerror = () => img.style.display = 'none';
+                    screenshotsContainer.appendChild(img);
+                });
             }
 
-            if (!appData) return;
+            // Set download button
+            const downloadBtn = document.getElementById('modalDownloadBtn');
+            downloadBtn.innerText = currentLang === 'ru' ? '⬇ Скачать' : '⬇ Download';
+            downloadBtn.onclick = () => window.open(app.downloadLink, '_blank');
 
-            selectedApp = appData;
-
-            // Fill modal
-            document.getElementById('modalIcon').src = appData.iconUrl || 'https://placehold.co/100';
-            document.getElementById('modalTitle').innerText = currentLang === 'ru' ? (appData.nameRu || 'Без названия') : (appData.nameEn || 'No Title');
-            document.getElementById('modalDeveloper').innerText = appData.developer || '—';
-            
-            const tagsText = [appData.hasAds ? (currentLang === 'ru' ? 'Есть реклама' : 'Has Ads') : '', appData.hasPaidContent ? (currentLang === 'ru' ? 'Есть платный контент' : 'Has Paid Content') : ''].filter(Boolean).join(' • ');
-            document.getElementById('modalTags').innerText = tagsText || '—';
-
-            // Stats
-            const rating = appData.rating ? `${appData.rating}★` : '—';
-            const reviews = appData.reviews ? `${appData.reviews} ${currentLang === 'ru' ? 'отзывов' : 'reviews'}` : '—';
-            document.getElementById('modalRating').innerText = rating;
-            document.getElementById('modalReviews').innerText = reviews;
-            document.getElementById('modalAge').innerText = appData.ageRating || '—';
-            document.getElementById('modalSize').innerText = appData.size || '—';
-
-            // Trailer
-            const trailerVideo = document.getElementById('modalTrailer');
-            if (appData.trailerUrl) {
-                trailerVideo.src = appData.trailerUrl;
-                trailerVideo.style.display = 'block';
-            } else {
-                trailerVideo.style.display = 'none';
-            }
-
-            // Screenshots
-            const screenshotsContainer = document.getElementById('screenshotsContainer');
-            if (appData.screenshots && appData.screenshots.length > 0) {
-                screenshotsContainer.innerHTML = appData.screenshots.map(screenshot => `
-                    <img src="${screenshot}" class="screenshot" onerror="this.src='https://placehold.co/120x180'">
-                `).join('');
-            } else {
-                screenshotsContainer.innerHTML = '';
-            }
-
-            // Description
-            const description = currentLang === 'ru' ? (appData.descriptionRu || appData.description || '') : (appData.descriptionEn || appData.description || '');
-            const preview = description.split('\n')[0] || description.substring(0, 100);
-            document.getElementById('descriptionPreview').innerText = preview + (description.length > preview.length ? '...' : '');
-            document.getElementById('descriptionFull').innerText = description;
-            document.getElementById('descriptionTitleText').innerText = currentLang === 'ru' ? 'Описание' : 'Description';
-
-            // Reset description expansion
-            const descTitle = document.querySelector('.description-title');
-            descTitle.classList.remove('expanded');
-            document.getElementById('descriptionFull').classList.remove('expanded');
-
-            // Download button
-            document.getElementById('downloadBtnText').innerText = currentLang === 'ru' ? 'Скачать' : 'Download';
+            // Reset description state
+            document.getElementById('modalDescription').classList.remove('expanded');
+            document.getElementById('expandBtn').classList.remove('expanded');
 
             // Show modal
-            document.getElementById('appModal').classList.add('active');
+            modal.classList.add('active');
+            overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
-        function closeAppModal() {
-            document.getElementById('appModal').classList.remove('active');
-            document.body.style.overflow = 'auto';
-            selectedApp = null;
+        function closeAppDetails() {
+            const modal = document.getElementById('appDetailsModal');
+            const overlay = document.getElementById('modalOverlay');
+            modal.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            document.getElementById('modalDescription').classList.remove('expanded');
+            document.getElementById('expandBtn').classList.remove('expanded');
         }
 
-        function toggleDescription(event) {
-            const titleElement = event.currentTarget;
-            const descFull = document.getElementById('descriptionFull');
-            const descPreview = document.getElementById('descriptionPreview');
+        function toggleDescription() {
+            const descText = document.getElementById('modalDescription');
+            const expandBtn = document.getElementById('expandBtn');
             
-            titleElement.classList.toggle('expanded');
-            descFull.classList.toggle('expanded');
-            
-            if (descFull.classList.contains('expanded')) {
-                descPreview.style.display = 'none';
-            } else {
-                descPreview.style.display = 'block';
-            }
+            descText.classList.toggle('expanded');
+            expandBtn.classList.toggle('expanded');
         }
 
-        function downloadApp() {
-            if (selectedApp && selectedApp.downloadLink) {
-                window.open(selectedApp.downloadLink, '_blank');
-            }
-        }
+        // Close modal when clicking overlay
+        document.getElementById('modalOverlay').addEventListener('click', closeAppDetails);
 
-        // Close modal when clicking outside
-        document.getElementById('appModal').addEventListener('click', (e) => {
-            if (e.target.id === 'appModal') {
-                closeAppModal();
-            }
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeAppDetails();
         });
 
         document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -636,6 +635,14 @@
             document.getElementById('nav-mods').innerText = currentLang === 'ru' ? 'Моддинг' : 'Mods';
             document.getElementById('nav-profile').innerText = currentLang === 'ru' ? 'Профиль' : 'Profile';
             
+            // Update modal if open
+            if (currentApp && document.getElementById('appDetailsModal').classList.contains('active')) {
+                document.getElementById('modalAppName').innerText = currentLang === 'ru' ? (currentApp.nameRu || 'Без названия') : (currentApp.nameEn || 'No Title');
+                document.getElementById('modalDescription').innerText = currentLang === 'ru' ? (currentApp.descriptionRu || '') : (currentApp.descriptionEn || '');
+                document.getElementById('descTitle').innerText = currentLang === 'ru' ? 'Описание' : 'Description';
+                document.getElementById('modalDownloadBtn').innerText = currentLang === 'ru' ? '⬇ Скачать' : '⬇ Download';
+            }
+
             const q = document.getElementById('searchInput').value.trim();
             q ? executeSearch(q.toLowerCase()) : filterCategory(currentCategory);
         });
