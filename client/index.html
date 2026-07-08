@@ -6,10 +6,150 @@
     <title>ZEROHUBSTORE - Главная</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <link rel="stylesheet" href="style.css">
-    
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0f172a; 
+            --card-bg: #1e293b; 
+            --neon-green: #00ff66; 
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 70px;
+            overflow-x: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+        .logo { font-size: 20px; font-weight: 900; color: var(--neon-green); letter-spacing: 1px; }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .lang-btn:active { background: var(--neon-green); color: var(--bg-color); }
+
+        .search-container { padding: 10px 20px; }
+        .search-bar {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid transparent;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 12px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .search-bar:focus { border-color: var(--neon-green); }
+
+        .section-title { 
+            padding: 20px 20px 10px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .apps-scroll {
+            display: flex;
+            overflow-x: auto;
+            padding: 0 20px 20px;
+            gap: 15px;
+        }
+        .apps-scroll::-webkit-scrollbar { display: none; }
+
+        .app-card {
+            min-width: 130px;
+            max-width: 130px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: 0.2s;
+        }
+        .app-icon {
+            width: 75px;
+            height: 75px;
+            border-radius: 18px;
+            margin: 0 auto 10px;
+            object-fit: cover;
+        }
+        .app-title { font-size: 14px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .app-size { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+
+        .install-btn {
+            background: rgba(0, 255, 102, 0.1);
+            color: var(--neon-green);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .install-btn:active { background: var(--neon-green); color: var(--bg-color); }
+
+        .empty-message { width: 100%; text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px 0; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(30, 41, 59, 0.98);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 15px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 11px;
+            gap: 5px;
+            width: 20%;
+            cursor: pointer;
+        }
+        .nav-item i { font-size: 20px; transition: 0.3s; }
+        .nav-item.active { color: var(--neon-green); }
+    </style>
 </head>
 <body>
 
@@ -28,15 +168,15 @@
     </div>
     
     <div id="apps-container" class="apps-scroll">
-        <div class="empty-message">Загрузка данных из Firebase... ⏳</div>
+        <div class="empty-message">Загрузка данных... ⏳</div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" id="btn-nav-games" onclick="filterCategory('game')">
+        <div class="nav-item active" onclick="filterCategory('game')">
             <i class="fas fa-gamepad"></i>
             <span id="nav-games">Игры</span>
         </div>
-        <div class="nav-item" id="btn-nav-apps" onclick="filterCategory('app')">
+        <div class="nav-item" onclick="filterCategory('app')">
             <i class="fas fa-mobile-alt"></i>
             <span id="nav-apps">Прилож.</span>
         </div>
@@ -44,18 +184,17 @@
             <i class="fas fa-search"></i>
             <span id="nav-search">Поиск</span>
         </div>
-        <div class="nav-item" id="btn-nav-mods" onclick="filterCategory('mod')">
+        <div class="nav-item" onclick="filterCategory('mod')">
             <i class="fas fa-tools"></i>
             <span id="nav-mods">Моддинг</span>
         </div>
-        <a href="../admin/dashboard.html" class="nav-item admin-nav">
+        <a href="admin/index.html" class="nav-item">
             <i class="fas fa-user-shield"></i>
             <span id="nav-profile">Профиль</span>
         </a>
     </div>
 
     <script>
-        // Танзимоти Firebase-и ту
         const firebaseConfig = {
             apiKey: "AIzaSyDB_-vXWoIr5eriBNPKODNA5AYp-jDAUHU",
             authDomain: "zerohubstore-a2983.firebaseapp.com",
@@ -67,7 +206,6 @@
             measurementId: "G-S619Y9E16P"
         };
 
-        // Инициализация
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -75,139 +213,85 @@
         let currentCategory = 'game';
         let currentLang = 'ru';
 
-        // 1. Бор кардани маълумот аз Firebase
         function loadData() {
             db.ref('apps').on('value', (snapshot) => {
                 allApps = [];
                 const data = snapshot.val();
                 if (data) {
-                    Object.keys(data).forEach(key => {
-                        allApps.push({ id: key, ...data[key] });
-                    });
+                    Object.keys(data).forEach(key => allApps.push(data[key]));
                 }
-                
                 const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-                if (searchQuery) {
-                    executeSearch(searchQuery);
-                } else {
-                    filterCategory(currentCategory);
-                }
-            }, (error) => {
-                console.error("Firebase Error:", error);
-                const errMsg = currentLang === 'ru' ? 'Ошибка загрузки данных' : 'Data loading error';
-                document.getElementById('apps-container').innerHTML = 
-                    `<div class="empty-message" style="color: #ff4444;">❌ ${errMsg}: ${error.message}</div>`;
+                searchQuery ? executeSearch(searchQuery) : filterCategory(currentCategory);
             });
         }
 
-        // 2. Филтратсияи категорияҳо
         function filterCategory(category) {
             currentCategory = category.toLowerCase();
-            
             const navItems = document.querySelectorAll('.bottom-nav .nav-item');
             navItems.forEach(item => item.classList.remove('active'));
-            
-            if (currentCategory === 'game') document.getElementById('btn-nav-games').classList.add('active');
-            if (currentCategory === 'app') document.getElementById('btn-nav-apps').classList.add('active');
-            if (currentCategory === 'mod') document.getElementById('btn-nav-mods').classList.add('active');
+            const indexMap = { 'game': 0, 'app': 1, 'mod': 3 };
+            if (navItems[indexMap[currentCategory]]) navItems[indexMap[currentCategory]].classList.add('active');
 
             document.getElementById('searchInput').value = '';
-            
-            const filtered = allApps.filter(item => {
-                const type = item.type || item.appType;
-                return type && type.toLowerCase() === currentCategory;
-            });
-
-            const titleSpan = document.getElementById('title-recommended');
-            if (titleSpan) {
-                if (currentLang === 'ru') {
-                    titleSpan.innerText = currentCategory === 'game' ? 'Игры' : currentCategory === 'app' ? 'Программы' : 'Модификации';
-                } else {
-                    titleSpan.innerText = currentCategory === 'game' ? 'Games' : currentCategory === 'app' ? 'Apps' : 'Mods';
-                }
-            }
+            const filtered = allApps.filter(item => item.type && item.type.toLowerCase() === currentCategory);
+            updateTitle(currentCategory);
             renderApps(filtered);
         }
 
-        // 3. Рендери кортҳо
+        function updateTitle(cat) {
+            const titleSpan = document.getElementById('title-recommended');
+            if (currentLang === 'ru') {
+                titleSpan.innerText = cat === 'game' ? 'Игры' : cat === 'app' ? 'Программы' : 'Модификации';
+            } else {
+                titleSpan.innerText = cat === 'game' ? 'Games' : cat === 'app' ? 'Apps' : 'Mods';
+            }
+        }
+
         function renderApps(appsToRender) {
             const container = document.getElementById('apps-container');
-            if (!container) return;
-
-            if (!appsToRender || appsToRender.length === 0) {
+            if (appsToRender.length === 0) {
                 container.innerHTML = `<div class="empty-message">${currentLang === 'ru' ? 'Ничего не найдено' : 'Nothing found'}</div>`;
                 return;
             }
-
-            container.innerHTML = appsToRender.map(app => {
-                // Хондани номҳо ҳам аз рӯи сохтори нав (nameRu) ва ҳам кӯҳна (prodName)
-                const title = currentLang === 'ru' ? (app.nameRu || app.prodNameRu || app.name || 'Без названия') : (app.nameEn || app.prodNameEn || app.name || 'No Title');
-                const btnText = currentLang === 'ru' ? 'Скачать' : 'Download';
-                const icon = app.iconUrl || app.prodIcon || 'https://placehold.co/100';
-                const size = app.size || app.prodSize || '—';
-                const link = app.downloadLink || app.prodLink || '#';
-
-                return `
-                    <div class="app-card">
-                        <img src="${icon}" class="app-icon" alt="${title}" onerror="this.src='https://placehold.co/100'">
-                        <div class="app-title">${title}</div>
-                        <div class="app-size">${size}</div>
-                        <button class="install-btn" onclick="window.open('${link}', '_blank')">
-                            <i class="fas fa-download"></i> ${btnText}
-                        </button>
-                    </div>
-                `;
-            }).join('');
+            container.innerHTML = appsToRender.map(app => `
+                <div class="app-card">
+                    <img src="${app.iconUrl || 'https://placehold.co/100'}" class="app-icon" onerror="this.src='https://placehold.co/100'">
+                    <div class="app-title">${currentLang === 'ru' ? (app.nameRu || 'Без названия') : (app.nameEn || 'No Title')}</div>
+                    <div class="app-size">${app.size || '—'}</div>
+                    <button class="install-btn" onclick="window.open('${app.downloadLink}', '_blank')">
+                        <i class="fas fa-download"></i> ${currentLang === 'ru' ? 'Скачать' : 'Download'}
+                    </button>
+                </div>
+            `).join('');
         }
 
-        // 4. Ҷустуҷӯ
         function executeSearch(query) {
-            const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-            navItems.forEach(item => item.classList.remove('active'));
-            if (navItems[2]) navItems[2].classList.add('active');
-
-            const filtered = allApps.filter(app => {
-                const nameRu = (app.nameRu || app.prodNameRu || app.name || '').toLowerCase();
-                const nameEn = (app.nameEn || app.prodNameEn || app.name || '').toLowerCase();
-                const category = (app.category || app.prodCategory || '').toLowerCase();
-                return nameRu.includes(query) || nameEn.includes(query) || category.includes(query);
-            });
-
-            const titleSpan = document.getElementById('title-recommended');
-            if (titleSpan) titleSpan.innerText = currentLang === 'ru' ? 'Результаты поиска' : 'Search Results';
+            const filtered = allApps.filter(app => 
+                (app.nameRu && app.nameRu.toLowerCase().includes(query)) || 
+                (app.nameEn && app.nameEn.toLowerCase().includes(query))
+            );
+            document.getElementById('title-recommended').innerText = currentLang === 'ru' ? 'Результаты поиска' : 'Search Results';
             renderApps(filtered);
         }
 
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            if (!query) {
-                filterCategory(currentCategory);
-                return;
-            }
-            executeSearch(query);
+            const q = e.target.value.toLowerCase().trim();
+            q ? executeSearch(q) : filterCategory(currentCategory);
         });
 
-        // 5. Ивази Забон
         document.getElementById('langToggle').addEventListener('click', (e) => {
             currentLang = currentLang === 'ru' ? 'en' : 'ru';
             e.target.innerText = currentLang === 'ru' ? 'RU / EN' : 'EN / RU';
-
             document.getElementById('nav-games').innerText = currentLang === 'ru' ? 'Игры' : 'Games';
             document.getElementById('nav-apps').innerText = currentLang === 'ru' ? 'Прилож.' : 'Apps';
             document.getElementById('nav-search').innerText = currentLang === 'ru' ? 'Поиск' : 'Search';
             document.getElementById('nav-mods').innerText = currentLang === 'ru' ? 'Моддинг' : 'Mods';
             document.getElementById('nav-profile').innerText = currentLang === 'ru' ? 'Профиль' : 'Profile';
-            document.getElementById('searchInput').placeholder = currentLang === 'ru' ? 'Поиск игр и приложений...' : 'Search games and apps...';
-
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-            if (searchQuery) {
-                executeSearch(searchQuery);
-            } else {
-                filterCategory(currentCategory);
-            }
+            
+            const q = document.getElementById('searchInput').value.trim();
+            q ? executeSearch(q.toLowerCase()) : filterCategory(currentCategory);
         });
 
-        // Оғози кор
         loadData();
     </script>
 </body>
