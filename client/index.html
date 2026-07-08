@@ -1,71 +1,214 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="tg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZEROHUB - Premium App & Game Market</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>ZEROHUBSTORE - Главная</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-    <header class="main-header">
-        <div class="header-container">
-            <div class="logo-area">
-                <a href="index.html" class="logo">ZERO<span>HUB</span></a>
-            </div>
+    <div class="header">
+        <div class="logo">ZEROHUBSTORE</div>
+        <button class="lang-btn" id="langToggle">RU / EN</button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Поиск игр и приложений...">
+    </div>
+
+    <div class="section-title">
+        <span id="title-recommended">Игры</span> 
+        <i class="fas fa-arrow-right" style="font-size: 14px;"></i>
+    </div>
+    
+    <div id="apps-container" class="apps-scroll">
+        <div class="empty-message">Загрузка данных из Firebase... ⏳</div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" id="btn-nav-games" onclick="filterCategory('game')">
+            <i class="fas fa-gamepad"></i>
+            <span id="nav-games">Игры</span>
+        </div>
+        <div class="nav-item" id="btn-nav-apps" onclick="filterCategory('app')">
+            <i class="fas fa-mobile-alt"></i>
+            <span id="nav-apps">Прилож.</span>
+        </div>
+        <div class="nav-item" onclick="document.getElementById('searchInput').focus()">
+            <i class="fas fa-search"></i>
+            <span id="nav-search">Поиск</span>
+        </div>
+        <div class="nav-item" id="btn-nav-mods" onclick="filterCategory('mod')">
+            <i class="fas fa-tools"></i>
+            <span id="nav-mods">Моддинг</span>
+        </div>
+        <a href="../admin/dashboard.html" class="nav-item admin-nav">
+            <i class="fas fa-user-shield"></i>
+            <span id="nav-profile">Профиль</span>
+        </a>
+    </div>
+
+    <script>
+        // Танзимоти Firebase-и ту
+        const firebaseConfig = {
+            apiKey: "AIzaSyDB_-vXWoIr5eriBNPKODNA5AYp-jDAUHU",
+            authDomain: "zerohubstore-a2983.firebaseapp.com",
+            databaseURL: "https://zerohubstore-a2983-default-rtdb.firebaseio.com",
+            projectId: "zerohubstore-a2983",
+            storageBucket: "zerohubstore-a2983.firebasestorage.app",
+            messagingSenderId: "527606629633",
+            appId: "1:527606629633:web:287254f0046715c5444700",
+            measurementId: "G-S619Y9E16P"
+        };
+
+        // Инициализация
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let allApps = [];
+        let currentCategory = 'game';
+        let currentLang = 'ru';
+
+        // 1. Бор кардани маълумот аз Firebase
+        function loadData() {
+            db.ref('apps').on('value', (snapshot) => {
+                allApps = [];
+                const data = snapshot.val();
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        allApps.push({ id: key, ...data[key] });
+                    });
+                }
+                
+                const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+                if (searchQuery) {
+                    executeSearch(searchQuery);
+                } else {
+                    filterCategory(currentCategory);
+                }
+            }, (error) => {
+                console.error("Firebase Error:", error);
+                const errMsg = currentLang === 'ru' ? 'Ошибка загрузки данных' : 'Data loading error';
+                document.getElementById('apps-container').innerHTML = 
+                    `<div class="empty-message" style="color: #ff4444;">❌ ${errMsg}: ${error.message}</div>`;
+            });
+        }
+
+        // 2. Филтратсияи категорияҳо
+        function filterCategory(category) {
+            currentCategory = category.toLowerCase();
             
-            <nav class="nav-links">
-                <a href="index.html" class="active"><i class="fa-solid fa-house"></i> <span class="nav-home">Главная</span></a>
-                <a href="products.html?type=apps"><i class="fa-solid fa-mobile-screen-button"></i> <span class="nav-apps">Приложения</span></a>
-                <a href="products.html?type=games"><i class="fa-solid fa-gamepad"></i> <span class="nav-games">Игры</span></a>
-            </nav>
+            const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            if (currentCategory === 'game') document.getElementById('btn-nav-games').classList.add('active');
+            if (currentCategory === 'app') document.getElementById('btn-nav-apps').classList.add('active');
+            if (currentCategory === 'mod') document.getElementById('btn-nav-mods').classList.add('active');
 
-            <div class="search-box">
-                <form action="search.html" method="GET" id="searchForm">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" name="q" placeholder="Поиск приложений и игр..." required autocomplete="off">
-                </form>
-            </div>
+            document.getElementById('searchInput').value = '';
+            
+            const filtered = allApps.filter(item => {
+                const type = item.type || item.appType;
+                return type && type.toLowerCase() === currentCategory;
+            });
 
-            <div class="user-actions">
-                <a href="../admin/login.html" class="admin-link-btn" title="Панели Админ"><i class="fa-solid fa-gauge-high"></i></a>
-            </div>
-        </div>
-    </header>
+            const titleSpan = document.getElementById('title-recommended');
+            if (titleSpan) {
+                if (currentLang === 'ru') {
+                    titleSpan.innerText = currentCategory === 'game' ? 'Игры' : currentCategory === 'app' ? 'Программы' : 'Модификации';
+                } else {
+                    titleSpan.innerText = currentCategory === 'game' ? 'Games' : currentCategory === 'app' ? 'Apps' : 'Mods';
+                }
+            }
+            renderApps(filtered);
+        }
 
-    <main class="container page-content">
-        
-        <section class="apps-section">
-            <h2 class="section-title" id="titleFeatured">Рекомендуемые <a href="products.html?filter=featured">Смотреть все <i class="fa-solid fa-arrow-right"></i></a></h2>
-            <div class="apps-grid" id="featuredAppsGrid">
-                </div>
-        </section>
+        // 3. Рендери кортҳо
+        function renderApps(appsToRender) {
+            const container = document.getElementById('apps-container');
+            if (!container) return;
 
-        <section class="apps-section">
-            <h2 class="section-title" id="titleNew">Новинки <a href="products.html?filter=new">Смотреть все <i class="fa-solid fa-arrow-right"></i></a></h2>
-            <div class="apps-grid" id="newAppsGrid">
-                </div>
-        </section>
+            if (!appsToRender || appsToRender.length === 0) {
+                container.innerHTML = `<div class="empty-message">${currentLang === 'ru' ? 'Ничего не найдено' : 'Nothing found'}</div>`;
+                return;
+            }
 
-        <section class="apps-section">
-            <h2 class="section-title" id="titlePopular">Популярные <a href="products.html?filter=popular">Смотреть все <i class="fa-solid fa-arrow-right"></i></a></h2>
-            <div class="apps-grid" id="popularAppsGrid">
-                </div>
-        </section>
+            container.innerHTML = appsToRender.map(app => {
+                // Хондани номҳо ҳам аз рӯи сохтори нав (nameRu) ва ҳам кӯҳна (prodName)
+                const title = currentLang === 'ru' ? (app.nameRu || app.prodNameRu || app.name || 'Без названия') : (app.nameEn || app.prodNameEn || app.name || 'No Title');
+                const btnText = currentLang === 'ru' ? 'Скачать' : 'Download';
+                const icon = app.iconUrl || app.prodIcon || 'https://placehold.co/100';
+                const size = app.size || app.prodSize || '—';
+                const link = app.downloadLink || app.prodLink || '#';
 
-    </main>
+                return `
+                    <div class="app-card">
+                        <img src="${icon}" class="app-icon" alt="${title}" onerror="this.src='https://placehold.co/100'">
+                        <div class="app-title">${title}</div>
+                        <div class="app-size">${size}</div>
+                        <button class="install-btn" onclick="window.open('${link}', '_blank')">
+                            <i class="fas fa-download"></i> ${btnText}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
 
-    <footer class="main-footer">
-        <div class="container footer-content">
-            <p>&copy; 2026 ZEROHUB Platform. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#" id="linkTerms">Условия</a>
-                <a href="#" id="linkPrivacy">Конфиденциальность</a>
-            </div>
-        </div>
-    </footer>
+        // 4. Ҷустуҷӯ
+        function executeSearch(query) {
+            const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            if (navItems[2]) navItems[2].classList.add('active');
 
-    <script type="module" src="client.js"></script>
+            const filtered = allApps.filter(app => {
+                const nameRu = (app.nameRu || app.prodNameRu || app.name || '').toLowerCase();
+                const nameEn = (app.nameEn || app.prodNameEn || app.name || '').toLowerCase();
+                const category = (app.category || app.prodCategory || '').toLowerCase();
+                return nameRu.includes(query) || nameEn.includes(query) || category.includes(query);
+            });
+
+            const titleSpan = document.getElementById('title-recommended');
+            if (titleSpan) titleSpan.innerText = currentLang === 'ru' ? 'Результаты поиска' : 'Search Results';
+            renderApps(filtered);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            if (!query) {
+                filterCategory(currentCategory);
+                return;
+            }
+            executeSearch(query);
+        });
+
+        // 5. Ивази Забон
+        document.getElementById('langToggle').addEventListener('click', (e) => {
+            currentLang = currentLang === 'ru' ? 'en' : 'ru';
+            e.target.innerText = currentLang === 'ru' ? 'RU / EN' : 'EN / RU';
+
+            document.getElementById('nav-games').innerText = currentLang === 'ru' ? 'Игры' : 'Games';
+            document.getElementById('nav-apps').innerText = currentLang === 'ru' ? 'Прилож.' : 'Apps';
+            document.getElementById('nav-search').innerText = currentLang === 'ru' ? 'Поиск' : 'Search';
+            document.getElementById('nav-mods').innerText = currentLang === 'ru' ? 'Моддинг' : 'Mods';
+            document.getElementById('nav-profile').innerText = currentLang === 'ru' ? 'Профиль' : 'Profile';
+            document.getElementById('searchInput').placeholder = currentLang === 'ru' ? 'Поиск игр и приложений...' : 'Search games and apps...';
+
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (searchQuery) {
+                executeSearch(searchQuery);
+            } else {
+                filterCategory(currentCategory);
+            }
+        });
+
+        // Оғози кор
+        loadData();
+    </script>
 </body>
 </html>
