@@ -6,152 +6,28 @@
     <title>ZEROHUBSTORE - Главная</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <link rel="stylesheet" href="style.css">
+    
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
     <style>
-        :root {
-            --bg-color: #0f172a; 
-            --card-bg: #1e293b; 
-            --neon-green: #00ff66; 
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-        }
-
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-bottom: 70px;
-            overflow-x: hidden;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            position: sticky;
-            top: 0;
-            background-color: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 100;
-        }
-        .logo { font-size: 20px; font-weight: 900; color: var(--neon-green); letter-spacing: 1px; }
-
-        .lang-btn {
-            background: transparent;
-            border: 1px solid var(--neon-green);
-            color: var(--neon-green);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .lang-btn:active { background: var(--neon-green); color: var(--bg-color); }
-
-        .search-container { padding: 10px 20px; }
-        .search-bar {
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid transparent;
-            color: white;
-            padding: 12px 15px;
-            border-radius: 12px;
-            outline: none;
-            transition: 0.3s;
-        }
-        .search-bar:focus { border-color: var(--neon-green); }
-
-        .section-title { 
-            padding: 20px 20px 10px; 
-            font-size: 18px; 
-            font-weight: bold; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-
-        .apps-scroll {
-            display: flex;
-            overflow-x: auto;
-            padding: 0 20px 20px;
-            gap: 15px;
-        }
-        .apps-scroll::-webkit-scrollbar { display: none; }
-
-        .app-card {
-            min-width: 130px;
-            max-width: 130px;
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-        .app-icon {
-            width: 75px;
-            height: 75px;
-            border-radius: 18px;
-            margin: 0 auto 10px;
-            object-fit: cover;
-        }
-        .app-title { font-size: 14px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .app-size { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
-
-        .install-btn {
-            background: rgba(0, 255, 102, 0.1);
-            color: var(--neon-green);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .install-btn:active { background: var(--neon-green); color: var(--bg-color); }
-
-        .empty-message { width: 100%; text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px 0; }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: rgba(30, 41, 59, 0.98);
-            backdrop-filter: blur(15px);
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0 15px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            z-index: 100;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 11px;
-            gap: 5px;
-            width: 20%;
-            cursor: pointer;
-        }
-        .nav-item i { font-size: 20px; transition: 0.3s; }
-        .nav-item.active { color: var(--neon-green); }
-
         /* App Details Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
         .app-details-modal {
             display: none;
             position: fixed;
@@ -159,7 +35,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: transparent;
             z-index: 1000;
             overflow-y: auto;
             animation: slideUp 0.3s ease-out;
@@ -177,15 +53,17 @@
         }
 
         .app-details-modal.active {
-            display: block;
+            display: flex;
+            align-items: flex-end;
         }
 
         .modal-content {
-            background: var(--bg-color);
+            background: var(--card-bg);
             border-radius: 20px 20px 0 0;
-            margin-top: auto;
+            width: 100%;
             padding: 0;
-            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
             animation: modalSlideUp 0.3s ease-out;
         }
 
@@ -196,6 +74,19 @@
             to {
                 transform: translateY(0);
             }
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--neon-green);
+            border-radius: 4px;
         }
 
         .modal-close-btn {
@@ -225,7 +116,7 @@
         .video-player {
             width: 100%;
             height: 250px;
-            background: var(--card-bg);
+            background: var(--bg-color);
             border-radius: 0;
         }
 
@@ -254,7 +145,6 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        .screenshot:active { transform: scale(0.95); }
 
         .app-info {
             padding: 20px;
@@ -284,6 +174,7 @@
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 5px;
+            color: var(--text-main);
         }
 
         .app-developer {
@@ -325,6 +216,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--text-main);
         }
 
         .description-text {
@@ -363,21 +255,6 @@
         .expand-btn.expanded i {
             transform: rotate(180deg);
         }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 999;
-            display: none;
-        }
-
-        .modal-overlay.active {
-            display: block;
-        }
     </style>
 </head>
 <body>
@@ -397,7 +274,7 @@
     </div>
     
     <div id="apps-container" class="apps-scroll">
-        <div class="empty-message">Загрузка данных... ⏳</div>
+        <div class="empty-message">Загрузка данных из Firebase... ⏳</div>
     </div>
 
     <!-- App Details Modal -->
@@ -462,7 +339,7 @@
             <i class="fas fa-tools"></i>
             <span id="nav-mods">Моддинг</span>
         </div>
-        <a href="admin/index.html" class="nav-item">
+        <a href="../admin/index.html" class="nav-item admin-nav">
             <i class="fas fa-user-shield"></i>
             <span id="nav-profile">Профиль</span>
         </a>
@@ -488,111 +365,174 @@
         let currentLang = 'ru';
         let currentApp = null;
 
+        // 1. БОР КАРДАН АЗ FIREBASE REALTIME DATABASE (ВАҚТИ ВОҚЕӢ)
         function loadData() {
             db.ref('apps').on('value', (snapshot) => {
                 allApps = [];
                 const data = snapshot.val();
                 if (data) {
-                    Object.keys(data).forEach(key => allApps.push(data[key]));
+                    Object.keys(data).forEach(key => {
+                        allApps.push(data[key]);
+                    });
                 }
+                
+                // Санҷиш: агар корбар дар ҳоли ҷустуҷӯ бошад, онро вайрон намекунем
                 const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-                searchQuery ? executeSearch(searchQuery) : filterCategory(currentCategory);
+                if (searchQuery) {
+                    executeSearch(searchQuery);
+                } else {
+                    filterCategory(currentCategory);
+                }
+            }, (error) => {
+                console.error("Хатогӣ Firebase:", error);
+                const errMsg = currentLang === 'ru' ? 'Ошибка загрузки данных' : 'Data loading error';
+                document.getElementById('apps-container').innerHTML = 
+                    `<div class="empty-message" style="color: #ff4444;">❌ ${errMsg}: ${error.message}</div>`;
             });
         }
 
+        // 2. ФИЛТРАТСИЯ БА КАТЕГОРИЯ
         function filterCategory(category) {
             currentCategory = category.toLowerCase();
+            
             const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-            navItems.forEach(item => item.classList.remove('active'));
-            const indexMap = { 'game': 0, 'app': 1, 'mod': 3 };
-            if (navItems[indexMap[currentCategory]]) navItems[indexMap[currentCategory]].classList.add('active');
+            if (navItems.length > 0) {
+                navItems.forEach(item => item.classList.remove('active'));
+                const indexMap = { 'game': 0, 'app': 1, 'mod': 3 };
+                if (indexMap[currentCategory] !== undefined && navItems[indexMap[currentCategory]]) {
+                    navItems[indexMap[currentCategory]].classList.add('active');
+                }
+            }
 
             document.getElementById('searchInput').value = '';
             const filtered = allApps.filter(item => item.type && item.type.toLowerCase() === currentCategory);
-            updateTitle(currentCategory);
+
+            const titleSpan = document.getElementById('title-recommended');
+            if (titleSpan) {
+                if (currentLang === 'ru') {
+                    titleSpan.innerText = currentCategory === 'game' ? 'Игры' : currentCategory === 'app' ? 'Программы' : 'Модификации';
+                } else {
+                    titleSpan.innerText = currentCategory === 'game' ? 'Games' : currentCategory === 'app' ? 'Apps' : 'Mods';
+                }
+            }
             renderApps(filtered);
         }
 
-        function updateTitle(cat) {
-            const titleSpan = document.getElementById('title-recommended');
-            if (currentLang === 'ru') {
-                titleSpan.innerText = cat === 'game' ? 'Игры' : cat === 'app' ? 'Программы' : 'Модификации';
-            } else {
-                titleSpan.innerText = cat === 'game' ? 'Games' : cat === 'app' ? 'Apps' : 'Mods';
-            }
-        }
-
+        // 3. РЕНДЕР КАРТОЧКАҲО
         function renderApps(appsToRender) {
             const container = document.getElementById('apps-container');
-            if (appsToRender.length === 0) {
+            if (!container) return;
+
+            if (!appsToRender || appsToRender.length === 0) {
                 container.innerHTML = `<div class="empty-message">${currentLang === 'ru' ? 'Ничего не найдено' : 'Nothing found'}</div>`;
                 return;
             }
-            container.innerHTML = appsToRender.map(app => `
-                <div class="app-card" onclick="openAppDetails(${JSON.stringify(app).replace(/"/g, '&quot;')})">
-                    <img src="${app.iconUrl || 'https://placehold.co/100'}" class="app-icon" onerror="this.src='https://placehold.co/100'">
-                    <div class="app-title">${currentLang === 'ru' ? (app.nameRu || 'Без названия') : (app.nameEn || 'No Title')}</div>
-                    <div class="app-size">${app.size || '—'}</div>
-                    <button class="install-btn" onclick="event.stopPropagation(); window.open('${app.downloadLink}', '_blank')">
-                        <i class="fas fa-download"></i> ${currentLang === 'ru' ? 'Скачать' : 'Download'}
-                    </button>
-                </div>
-            `).join('');
+
+            container.innerHTML = appsToRender.map(app => {
+                const title = currentLang === 'ru' ? (app.nameRu || 'Без названия') : (app.nameEn || 'No Title');
+                const btnText = currentLang === 'ru' ? 'Скачать' : 'Download';
+                const icon = app.iconUrl || 'https://placehold.co/100';
+                const size = app.size || '—';
+                const link = app.downloadLink || '#';
+
+                return `
+                    <div class="app-card" onclick="openAppDetails('${JSON.stringify(app).replace(/'/g, '&#39;')}')">
+                        <img src="${icon}" class="app-icon" alt="${title}" onerror="this.src='https://placehold.co/100'">
+                        <div class="app-title">${title}</div>
+                        <div class="app-size">${size}</div>
+                        <button class="install-btn" onclick="event.stopPropagation(); window.open('${link}', '_blank')">
+                            <i class="fas fa-download"></i> ${btnText}
+                        </button>
+                    </div>
+                `;
+            }).join('');
         }
 
+        // 4. ФУНКСИЯИ ХУДИ ҶУСТУҶӮ
         function executeSearch(query) {
+            const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+            if (navItems.length >= 3) {
+                navItems.forEach(item => item.classList.remove('active'));
+                navItems[2].classList.add('active');
+            }
+
             const filtered = allApps.filter(app => 
                 (app.nameRu && app.nameRu.toLowerCase().includes(query)) || 
-                (app.nameEn && app.nameEn.toLowerCase().includes(query))
+                (app.nameEn && app.nameEn.toLowerCase().includes(query)) ||
+                (app.category && app.category.toLowerCase().includes(query))
             );
-            document.getElementById('title-recommended').innerText = currentLang === 'ru' ? 'Результаты поиска' : 'Search Results';
+
+            const titleSpan = document.getElementById('title-recommended');
+            if (titleSpan) titleSpan.innerText = currentLang === 'ru' ? 'Результаты поиска' : 'Search Results';
             renderApps(filtered);
         }
 
-        function openAppDetails(app) {
-            currentApp = app;
-            const modal = document.getElementById('appDetailsModal');
-            const overlay = document.getElementById('modalOverlay');
+        // APP DETAILS MODAL FUNCTIONS
+        function openAppDetails(appJson) {
+            try {
+                const app = JSON.parse(appJson);
+                currentApp = app;
+                const modal = document.getElementById('appDetailsModal');
+                const overlay = document.getElementById('modalOverlay');
 
-            // Set app info
-            document.getElementById('modalAppName').innerText = currentLang === 'ru' ? (app.nameRu || 'Без названия') : (app.nameEn || 'No Title');
-            document.getElementById('modalAppDeveloper').innerText = app.developer || 'Unknown Developer';
-            document.getElementById('modalAppIcon').src = app.iconUrl || 'https://placehold.co/100';
-            document.getElementById('modalAppSize').innerText = app.size || '—';
-            document.getElementById('modalDescription').innerText = currentLang === 'ru' ? (app.descriptionRu || '') : (app.descriptionEn || '');
-            document.getElementById('descTitle').innerText = currentLang === 'ru' ? 'Описание' : 'Description';
-            document.getElementById('expandBtn').innerText = currentLang === 'ru' ? '▼' : '▼';
+                // Set app info
+                document.getElementById('modalAppName').innerText = currentLang === 'ru' ? (app.nameRu || 'Без названия') : (app.nameEn || 'No Title');
+                document.getElementById('modalAppDeveloper').innerText = app.developer || 'Unknown Developer';
+                document.getElementById('modalAppIcon').src = app.iconUrl || 'https://placehold.co/100';
+                document.getElementById('modalAppSize').innerText = app.size || '—';
+                
+                const descRu = app.descRu || '';
+                const descEn = app.descEn || '';
+                document.getElementById('modalDescription').innerText = currentLang === 'ru' ? descRu : descEn;
+                document.getElementById('descTitle').innerText = currentLang === 'ru' ? 'Описание' : 'Description';
 
-            // Set trailer video
-            const trailerVideo = document.getElementById('trailerVideo');
-            trailerVideo.src = app.trailerUrl || '';
+                // Set trailer video
+                const trailerVideo = document.getElementById('trailerVideo');
+                if (app.trailerUrl) {
+                    trailerVideo.src = app.trailerUrl;
+                } else {
+                    trailerVideo.src = '';
+                }
 
-            // Set screenshots
-            const screenshotsContainer = document.getElementById('screenshotsScroll');
-            screenshotsContainer.innerHTML = '';
-            if (app.screenshots && Array.isArray(app.screenshots)) {
-                app.screenshots.forEach(screenshot => {
-                    const img = document.createElement('img');
-                    img.src = screenshot;
-                    img.class = 'screenshot';
-                    img.onerror = () => img.style.display = 'none';
-                    screenshotsContainer.appendChild(img);
-                });
+                // Set screenshots
+                const screenshotsContainer = document.getElementById('screenshotsScroll');
+                screenshotsContainer.innerHTML = '';
+                
+                if (app.screenshots) {
+                    let screenshotArray = [];
+                    if (typeof app.screenshots === 'string') {
+                        screenshotArray = app.screenshots.split(',').map(s => s.trim());
+                    } else if (Array.isArray(app.screenshots)) {
+                        screenshotArray = app.screenshots;
+                    }
+                    
+                    screenshotArray.forEach(screenshot => {
+                        if (screenshot) {
+                            const img = document.createElement('img');
+                            img.src = screenshot;
+                            img.className = 'screenshot';
+                            img.onerror = () => img.style.display = 'none';
+                            screenshotsContainer.appendChild(img);
+                        }
+                    });
+                }
+
+                // Set download button
+                const downloadBtn = document.getElementById('modalDownloadBtn');
+                downloadBtn.innerText = currentLang === 'ru' ? '⬇ Скачать' : '⬇ Download';
+                downloadBtn.onclick = () => window.open(app.downloadLink, '_blank');
+
+                // Reset description state
+                document.getElementById('modalDescription').classList.remove('expanded');
+                document.getElementById('expandBtn').classList.remove('expanded');
+
+                // Show modal
+                modal.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } catch (e) {
+                console.error('Error parsing app data:', e);
             }
-
-            // Set download button
-            const downloadBtn = document.getElementById('modalDownloadBtn');
-            downloadBtn.innerText = currentLang === 'ru' ? '⬇ Скачать' : '⬇ Download';
-            downloadBtn.onclick = () => window.open(app.downloadLink, '_blank');
-
-            // Reset description state
-            document.getElementById('modalDescription').classList.remove('expanded');
-            document.getElementById('expandBtn').classList.remove('expanded');
-
-            // Show modal
-            modal.classList.add('active');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
         }
 
         function closeAppDetails() {
@@ -621,32 +561,45 @@
             if (e.key === 'Escape') closeAppDetails();
         });
 
+        // СУШУДАН БА САТРИ ҶУСТУҶӮ
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            const q = e.target.value.toLowerCase().trim();
-            q ? executeSearch(q) : filterCategory(currentCategory);
+            const query = e.target.value.toLowerCase().trim();
+            if (!query) {
+                filterCategory(currentCategory);
+                return;
+            }
+            executeSearch(query);
         });
 
+        // 5. ИВАЗИ ЗАБОН (RU/EN)
         document.getElementById('langToggle').addEventListener('click', (e) => {
             currentLang = currentLang === 'ru' ? 'en' : 'ru';
             e.target.innerText = currentLang === 'ru' ? 'RU / EN' : 'EN / RU';
+
             document.getElementById('nav-games').innerText = currentLang === 'ru' ? 'Игры' : 'Games';
             document.getElementById('nav-apps').innerText = currentLang === 'ru' ? 'Прилож.' : 'Apps';
             document.getElementById('nav-search').innerText = currentLang === 'ru' ? 'Поиск' : 'Search';
             document.getElementById('nav-mods').innerText = currentLang === 'ru' ? 'Моддинг' : 'Mods';
             document.getElementById('nav-profile').innerText = currentLang === 'ru' ? 'Профиль' : 'Profile';
-            
+            document.getElementById('searchInput').placeholder = currentLang === 'ru' ? 'Поиск игр и приложений...' : 'Search games and apps...';
+
             // Update modal if open
             if (currentApp && document.getElementById('appDetailsModal').classList.contains('active')) {
                 document.getElementById('modalAppName').innerText = currentLang === 'ru' ? (currentApp.nameRu || 'Без названия') : (currentApp.nameEn || 'No Title');
-                document.getElementById('modalDescription').innerText = currentLang === 'ru' ? (currentApp.descriptionRu || '') : (currentApp.descriptionEn || '');
+                document.getElementById('modalDescription').innerText = currentLang === 'ru' ? (currentApp.descRu || '') : (currentApp.descEn || '');
                 document.getElementById('descTitle').innerText = currentLang === 'ru' ? 'Описание' : 'Description';
                 document.getElementById('modalDownloadBtn').innerText = currentLang === 'ru' ? '⬇ Скачать' : '⬇ Download';
             }
 
-            const q = document.getElementById('searchInput').value.trim();
-            q ? executeSearch(q.toLowerCase()) : filterCategory(currentCategory);
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (searchQuery) {
+                executeSearch(searchQuery);
+            } else {
+                filterCategory(currentCategory);
+            }
         });
 
+        // ОҒОЗ БОР КАРДАНИ МАЪЛУМОТ
         loadData();
     </script>
 </body>
