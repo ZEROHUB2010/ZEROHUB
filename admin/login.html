@@ -3,37 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZEROHUB - Вуруд ба Панели Админ</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>Панели Идоракунии ZEROHUBSTORE (Firebase Realtime)</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .login-page { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
-        .login-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 40px; border-radius: 24px; width: 100%; max-width: 420px; text-align: center; box-shadow: var(--shadow-premium); }
-        .login-logo { font-size: 28px; font-weight: 800; margin-bottom: 10px; letter-spacing: 1px; }
-        .login-logo span { color: var(--primary); }
-        .login-subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
-        .btn-google { width: 100%; background: #ffffff; color: #000000; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: var(--transition-smooth); }
-        .btn-google:hover { background: #e2e8f0; transform: translateY(-2px); }
-        .error-msg { color: #ff4a4a; font-size: 14px; margin-top: 15px; display: none; background: rgba(255, 74, 74, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 74, 74, 0.2); }
-    </style>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-    <div class="container login-page">
-        <div class="login-card">
-            <div class="login-logo">ZERO<span>HUB</span></div>
-            <div class="login-subtitle">Панели махфии мудирият. Танҳо барои админ.</div>
-            
-            <button id="googleLoginBtn" class="btn-google">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_認證圖標.svg" alt="Google" style="width: 20px; height: 20px;">
-                Вуруд бо ҳисоби Google
-            </button>
+    <div id="login-screen">
+        <h2><i class="fas fa-user-shield"></i> ZEROHUBSTORE</h2>
+        <input type="password" id="adminPassword" class="login-input" placeholder="Паролро ворид кунед">
+        <button class="login-btn" onclick="checkPassword()">Даромадан</button>
+        <p id="login-error" style="color: var(--danger); font-size: 13px; margin-top: 15px; display: none;">Парол нодуруст аст! 🤔</p>
+    </div>
 
-            <div id="errorBox" class="error-msg"></div>
+    <div id="admin-panel" style="display: none;">
+        <div class="admin-header">
+            <h1>Панели Admin (Firebase Realtime Database)</h1>
+            <button class="logout-btn" onclick="logout()">Баромад</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><i class="fas fa-box"></i><h3 id="stat-total">0</h3><p>Маҳсулот</p></div>
+            <div class="stat-card"><i class="fas fa-eye"></i><h3 id="stat-views">0</h3><p>Мушоҳидаҳо</p></div>
+            <div class="stat-card"><i class="fas fa-download"></i><h3 id="stat-downloads">0</h3><p>Зеркашиҳо</p></div>
+        </div>
+
+        <div class="form-container">
+            <h2><i class="fas fa-plus-circle"></i> Илова кардани Маҳсулот</h2>
+            <form id="addAppForm" onsubmit="submitForm(event)">
+                <div class="form-group"><label>ID-и Маҳсулот</label><input type="text" id="appId" class="form-control" readonly></div>
+                <div class="form-group"><label>Номи Барнома (Русӣ)</label><input type="text" id="nameRu" class="form-control" required></div>
+                <div class="form-group"><label>Номи Барнома (Англисӣ)</label><input type="text" id="nameEn" class="form-control" required></div>
+                <div class="form-group"><label>Намуд</label>
+                    <select id="appType" class="form-control" required>
+                        <option value="game">Бозӣ (Game)</option>
+                        <option value="app">Барнома (App)</option>
+                        <option value="mod">Моддинг (Mod)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Категория</label><input type="text" id="category" class="form-control" required></div>
+                <div class="form-group"><label>Версия</label><input type="text" id="version" class="form-control" required></div>
+                <div class="form-group"><label>Ҳаҷм</label><input type="text" id="size" class="form-control" required></div>
+                <div class="form-group"><label>Таҳиягар</label><input type="text" id="developer" class="form-control" required></div>
+                <div class="form-group"><label>Пайванди ТГ (Download URL)</label><input type="url" id="downloadLink" class="form-control" required></div>
+                
+                <div class="form-group"><label>Акси Иконка (URL)</label><input type="url" id="iconUrl" class="form-control" required placeholder="https://..."></div>
+                <div class="form-group"><label>Видео-Трейлер (URL - Ихтиёрӣ)</label><input type="url" id="trailerUrl" class="form-control" placeholder="https://youtube.com/..."></div>
+                
+                <div class="form-group">
+                    <label>Скриншотҳо (Пайвандҳо - То 4 дона)</label>
+                    <input type="url" id="screenshot1" class="form-control" placeholder="Скриншот 1 (URL)" style="margin-bottom: 5px;">
+                    <input type="url" id="screenshot2" class="form-control" placeholder="Скриншот 2 (URL)" style="margin-bottom: 5px;">
+                    <input type="url" id="screenshot3" class="form-control" placeholder="Скриншот 3 (URL)" style="margin-bottom: 5px;">
+                    <input type="url" id="screenshot4" class="form-control" placeholder="Скриншот 4 (URL)">
+                </div>
+                
+                <div class="form-group"><label>Тавсиф (Русӣ)</label><textarea id="descRu" class="form-control" style="height: 60px;" required></textarea></div>
+                <div class="form-group"><label>Тавсиф (Англисӣ)</label><textarea id="descEn" class="form-control" style="height: 60px;" required></textarea></div>
+                
+                <div class="checkbox-group"><input type="checkbox" id="isRecommended"><label for="isRecommended">Ба "Рекомендуемые" илова шавад?</label></div>
+                <button type="submit" class="submit-btn">Худкор тавлид ва илова кун</button>
+            </form>
+        </div>
+
+        <div class="form-container">
+            <h2><i class="fas fa-list"></i> Рӯйхати Маҳсулот (Таҳрир/Удалить)</h2>
+            <div id="products-list" style="margin-top: 15px;"></div>
         </div>
     </div>
 
-    <script type="module" src="admin.js?v=3"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDB_-vXWoIr5eriBNPKODNA5AYp-jDAUHU",
+            authDomain: "zerohubstore-a2983.firebaseapp.com",
+            databaseURL: "https://zerohubstore-a2983-default-rtdb.firebaseio.com",
+            projectId: "zerohubstore-a2983",
+            storageBucket: "zerohubstore-a2983.firebasestorage.app",
+            messagingSenderId: "527606629633",
+            appId: "1:527606629633:web:287254f0046715c5444700",
+            measurementId: "G-S619Y9E16P"
+        };
 
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let adminToken = '';
+
+        function checkPassword() {
+            const passInput = document.getElementById('adminPassword').value;
+            if (passInput === 'ВАЛИҶОН2010') {
+                adminToken = passInput;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                loadDashboardData();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            adminToken = '';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'block';
+        }
+
+        // 1. БОР КАРДАН ВА САТРИ СТАТИСТИКА (FIREBASE REALTIME)
+        function loadDashboardData() {
+            // .on('value') ба таври зинда кор мекунад, даъвати дубораи он лозим нест
+            db.ref('apps').on('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                const count = Object.keys(data).length;
+
+                document.getElementById('stat-total').innerText = count;
+                document.getElementById('stat-views').innerText = count * 42; 
+                document.getElementById('stat-downloads').innerText = count * 15;
+                document.getElementById('appId').value = `ZH-${1001 + count}`;
+
+                let listHtml = '';
+                Object.keys(data).forEach(key => {
+                    const app = data[key];
+                    listHtml += `
+                    <div class="app-item">
+                        <div><strong>${app.nameRu || 'Беном'}</strong><span>ID: ${app.appId}</span></div>
+                        <button class="delete-btn" onclick="deleteApp('${app.appId}')"><i class="fas fa-trash"></i> Удалить</button>
+                    </div>`;
+                });
+                document.getElementById('products-list').innerHTML = listHtml || '<p style="color: var(--text-muted); font-size: 14px;">Ҳоло ягон маҳсулот нест.</p>';
+            }, (error) => {
+                console.error("Хатогӣ Firebase:", error);
+            });
+        }
+
+        // 2. ИЛОВА КАРДАН (FIREBASE REALTIME DATABASE)
+        async function submitForm(event) {
+            event.preventDefault();
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.innerText = "Дар ҳоли ирсол...";
+            submitBtn.disabled = true;
+
+            const screenshotsArray = [];
+            for (let i = 1; i <= 4; i++) {
+                const val = document.getElementById(`screenshot${i}`).value.trim();
+                if (val) screenshotsArray.push(val);
+            }
+
+            const currentAppId = document.getElementById('appId').value;
+
+            const newApp = {
+                appId: currentAppId,
+                nameRu: document.getElementById('nameRu').value,
+                nameEn: document.getElementById('nameEn').value,
+                type: document.getElementById('appType').value,
+                category: document.getElementById('category').value,
+                version: document.getElementById('version').value,
+                size: document.getElementById('size').value,
+                developer: document.getElementById('developer').value,
+                downloadLink: document.getElementById('downloadLink').value,
+                iconUrl: document.getElementById('iconUrl').value,
+                trailerUrl: document.getElementById('trailerUrl').value,
+                screenshots: screenshotsArray.join(', '), 
+                descRu: document.getElementById('descRu').value,
+                descEn: document.getElementById('descEn').value,
+                isRecommended: document.getElementById('isRecommended').checked
+            };
+
+            try {
+                // Сабт дар Firebase Realtime Database
+                await db.ref('apps/' + currentAppId).set(newApp);
+                alert("✅ Маҳсулот бомуваффақият илова шуд!");
+                document.getElementById('addAppForm').reset();
+                // Тоза кардани ID лозим нест, зеро механизми зиндаи .on худаш онро ҳисоб карда мегузорад
+            } catch (error) {
+                console.error("Хатогӣ:", error);
+                alert("❌ Хатогӣ ҳангоми сабт: " + error.message);
+            } finally {
+                submitBtn.innerText = "Худкор тавлид ва илова кун";
+                submitBtn.disabled = false;
+            }
+        }
+
+        // 3. НЕСТ КАРДАН (DELETE FROM FIREBASE REALTIME DATABASE)
+        async function deleteApp(appId) {
+            if (!confirm(`Шумо мутмаин ҳастед, ки маҳсулоти ${appId}-ро нест кардан мехоҳед?`)) return;
+            try {
+                await db.ref('apps/' + appId).remove();
+                alert("🗑️ Маҳсулот нест карда шуд!");
+                // loadDashboardData() дастӣ лозим нест, худи Firebase тағйиротро мешунавад
+            } catch (error) {
+                console.error("Хатогӣ:", error);
+                alert("❌ Хатогӣ ҳангоми нест кардан: " + error.message);
+            }
+        }
+    </script>
 </body>
 </html>
