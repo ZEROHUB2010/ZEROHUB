@@ -98,6 +98,7 @@
             flex-direction: column;
             justify-content: space-between;
             transition: 0.2s;
+            cursor: pointer;
         }
         .app-icon {
             width: 75px;
@@ -149,6 +150,197 @@
         }
         .nav-item i { font-size: 20px; transition: 0.3s; }
         .nav-item.active { color: var(--neon-green); }
+
+        /* App Detail Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            overflow-y: auto;
+            padding-bottom: 70px;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .modal-content {
+            background: var(--bg-color);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 0;
+            position: relative;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 201;
+        }
+
+        .modal-app-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            object-fit: cover;
+            margin: 0 auto 15px;
+            display: block;
+        }
+
+        .modal-app-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-app-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .modal-app-developer {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .modal-app-tags {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .modal-app-stats {
+            display: flex;
+            justify-content: space-around;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--neon-green);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .modal-trailer {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            object-fit: cover;
+        }
+
+        .screenshots-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        .screenshots-container::-webkit-scrollbar { height: 4px; }
+        .screenshots-container::-webkit-scrollbar-track { background: var(--card-bg); border-radius: 10px; }
+        .screenshots-container::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 10px; }
+
+        .screenshot {
+            min-width: 120px;
+            height: 180px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .description-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .description-title {
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .description-title i {
+            transition: 0.3s;
+        }
+
+        .description-title.expanded i {
+            transform: rotate(90deg);
+        }
+
+        .description-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+        }
+
+        .description-text.expanded {
+            max-height: 500px;
+        }
+
+        .description-preview {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .modal-download-btn {
+            background: rgba(0, 255, 102, 0.1);
+            color: var(--neon-green);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .modal-download-btn:active {
+            background: var(--neon-green);
+            color: var(--bg-color);
+        }
     </style>
 </head>
 <body>
@@ -169,6 +361,53 @@
     
     <div id="apps-container" class="apps-scroll">
         <div class="empty-message">Загрузка данных... ⏳</div>
+    </div>
+
+    <!-- App Detail Modal -->
+    <div id="appModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="closeAppModal()">✕</button>
+            
+            <img id="modalIcon" class="modal-app-icon" src="" alt="">
+            
+            <div class="modal-app-info">
+                <div class="modal-app-title" id="modalTitle"></div>
+                <div class="modal-app-developer" id="modalDeveloper"></div>
+                <div class="modal-app-tags" id="modalTags"></div>
+            </div>
+
+            <div class="modal-app-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="modalRating">—</div>
+                    <div class="stat-label" id="modalReviews">—</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="modalAge">—</div>
+                    <div class="stat-label" id="modalAgeLabel">Age</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="modalSize">—</div>
+                    <div class="stat-label" id="modalSizeLabel">Size</div>
+                </div>
+            </div>
+
+            <video id="modalTrailer" class="modal-trailer" controls></video>
+
+            <div class="screenshots-container" id="screenshotsContainer"></div>
+
+            <div class="description-section">
+                <div class="description-title" onclick="toggleDescription(event)">
+                    <span id="descriptionTitleText">Description</span>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="description-preview" id="descriptionPreview"></div>
+                <div class="description-text" id="descriptionFull"></div>
+            </div>
+
+            <button class="modal-download-btn" id="modalDownloadBtn" onclick="downloadApp()">
+                <i class="fas fa-download"></i> <span id="downloadBtnText">Download</span>
+            </button>
+        </div>
     </div>
 
     <div class="bottom-nav">
@@ -212,6 +451,7 @@
         let allApps = [];
         let currentCategory = 'game';
         let currentLang = 'ru';
+        let selectedApp = null;
 
         function loadData() {
             db.ref('apps').on('value', (snapshot) => {
@@ -254,11 +494,11 @@
                 return;
             }
             container.innerHTML = appsToRender.map(app => `
-                <div class="app-card">
+                <div class="app-card" onclick="openAppModal(this)">
                     <img src="${app.iconUrl || 'https://placehold.co/100'}" class="app-icon" onerror="this.src='https://placehold.co/100'">
                     <div class="app-title">${currentLang === 'ru' ? (app.nameRu || 'Без названия') : (app.nameEn || 'No Title')}</div>
                     <div class="app-size">${app.size || '—'}</div>
-                    <button class="install-btn" onclick="window.open('${app.downloadLink}', '_blank')">
+                    <button class="install-btn" onclick="event.stopPropagation(); window.open('${app.downloadLink}', '_blank')">
                         <i class="fas fa-download"></i> ${currentLang === 'ru' ? 'Скачать' : 'Download'}
                     </button>
                 </div>
@@ -273,6 +513,114 @@
             document.getElementById('title-recommended').innerText = currentLang === 'ru' ? 'Результаты поиска' : 'Search Results';
             renderApps(filtered);
         }
+
+        function openAppModal(element) {
+            const appCard = element.closest('.app-card');
+            const appIndex = Array.from(document.querySelectorAll('.app-card')).indexOf(appCard);
+            const container = document.getElementById('apps-container');
+            const cards = container.querySelectorAll('.app-card');
+            let appData = null;
+
+            for (let app of allApps) {
+                const appName = currentLang === 'ru' ? app.nameRu : app.nameEn;
+                if (appCard.querySelector('.app-title').innerText === appName) {
+                    appData = app;
+                    break;
+                }
+            }
+
+            if (!appData) return;
+
+            selectedApp = appData;
+
+            // Fill modal
+            document.getElementById('modalIcon').src = appData.iconUrl || 'https://placehold.co/100';
+            document.getElementById('modalTitle').innerText = currentLang === 'ru' ? (appData.nameRu || 'Без названия') : (appData.nameEn || 'No Title');
+            document.getElementById('modalDeveloper').innerText = appData.developer || '—';
+            
+            const tagsText = [appData.hasAds ? (currentLang === 'ru' ? 'Есть реклама' : 'Has Ads') : '', appData.hasPaidContent ? (currentLang === 'ru' ? 'Есть платный контент' : 'Has Paid Content') : ''].filter(Boolean).join(' • ');
+            document.getElementById('modalTags').innerText = tagsText || '—';
+
+            // Stats
+            const rating = appData.rating ? `${appData.rating}★` : '—';
+            const reviews = appData.reviews ? `${appData.reviews} ${currentLang === 'ru' ? 'отзывов' : 'reviews'}` : '—';
+            document.getElementById('modalRating').innerText = rating;
+            document.getElementById('modalReviews').innerText = reviews;
+            document.getElementById('modalAge').innerText = appData.ageRating || '—';
+            document.getElementById('modalSize').innerText = appData.size || '—';
+
+            // Trailer
+            const trailerVideo = document.getElementById('modalTrailer');
+            if (appData.trailerUrl) {
+                trailerVideo.src = appData.trailerUrl;
+                trailerVideo.style.display = 'block';
+            } else {
+                trailerVideo.style.display = 'none';
+            }
+
+            // Screenshots
+            const screenshotsContainer = document.getElementById('screenshotsContainer');
+            if (appData.screenshots && appData.screenshots.length > 0) {
+                screenshotsContainer.innerHTML = appData.screenshots.map(screenshot => `
+                    <img src="${screenshot}" class="screenshot" onerror="this.src='https://placehold.co/120x180'">
+                `).join('');
+            } else {
+                screenshotsContainer.innerHTML = '';
+            }
+
+            // Description
+            const description = currentLang === 'ru' ? (appData.descriptionRu || appData.description || '') : (appData.descriptionEn || appData.description || '');
+            const preview = description.split('\n')[0] || description.substring(0, 100);
+            document.getElementById('descriptionPreview').innerText = preview + (description.length > preview.length ? '...' : '');
+            document.getElementById('descriptionFull').innerText = description;
+            document.getElementById('descriptionTitleText').innerText = currentLang === 'ru' ? 'Описание' : 'Description';
+
+            // Reset description expansion
+            const descTitle = document.querySelector('.description-title');
+            descTitle.classList.remove('expanded');
+            document.getElementById('descriptionFull').classList.remove('expanded');
+
+            // Download button
+            document.getElementById('downloadBtnText').innerText = currentLang === 'ru' ? 'Скачать' : 'Download';
+
+            // Show modal
+            document.getElementById('appModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAppModal() {
+            document.getElementById('appModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            selectedApp = null;
+        }
+
+        function toggleDescription(event) {
+            const titleElement = event.currentTarget;
+            const descFull = document.getElementById('descriptionFull');
+            const descPreview = document.getElementById('descriptionPreview');
+            
+            titleElement.classList.toggle('expanded');
+            descFull.classList.toggle('expanded');
+            
+            if (descFull.classList.contains('expanded')) {
+                descPreview.style.display = 'none';
+            } else {
+                descPreview.style.display = 'block';
+            }
+        }
+
+        function downloadApp() {
+            if (selectedApp && selectedApp.downloadLink) {
+                window.open(selectedApp.downloadLink, '_blank');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('appModal').addEventListener('click', (e) => {
+            if (e.target.id === 'appModal') {
+                closeAppModal();
+            }
+        });
 
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const q = e.target.value.toLowerCase().trim();
